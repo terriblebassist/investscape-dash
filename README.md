@@ -16,7 +16,7 @@ Refer  ```transaction_format.csv``` . Project references a Google Sheet, but can
 ### Format Description
 | date | scheme_code | scheme_name | value | units |
 |--|--|--|--|--|
-|  |  | |
+| 01-12-2019 | 118989 | HDFC Mid Cap Opportunities Fund | 20000 | 100
 
  1. **date** : plain text, format DD/MM/YYYY. (Example: 01/12/2020)
  2. **scheme_code**: integer, MF scheme code as per AMFI website (```https://www.amfiindia.com/spages/NAVAll.txt```)
