@@ -30,7 +30,7 @@ DATERANGE_SELECTOR = dict(
 )
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+server = app.server
 
 def getFormat(title, xtitle, ytitle, height):
     return dict(
@@ -201,4 +201,6 @@ app.layout = html.Div([
     ], className="row")
 ])
 
-app.run_server(debug=True)
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
