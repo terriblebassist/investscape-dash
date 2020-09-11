@@ -5,3 +5,4 @@ venv
 *.csv
 *.pickle
 *.json
+!transaction_format.csv
