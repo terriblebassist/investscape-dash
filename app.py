@@ -47,7 +47,7 @@ DATERANGE_SELECTOR = dict(
     ])
 )
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(external_stylesheets=[dbc.themes.MATERIA], suppress_callback_exceptions=True)
 
 def getFormat(title, xtitle, ytitle, height):
     return dict(
