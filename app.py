@@ -1,6 +1,8 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -10,13 +12,29 @@ import requests
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
-from historicalnav import getHistoricalNavMap, getNavForDate
 from connectgooglesheets import get_transactions_dump
+from historicalnav import getHistoricalNavMap, getNavForDate
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 SPREADSHEET_ID = '1mPoXJ3Pv9EmITjFni3Z4dNe2tk8U3yMM0VmUGD8EEPI'
 RANGE_NAME = 'transactions'
+
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "25rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
+
+CONTENT_STYLE = {
+    "margin-left": "25rem",
+    "margin-right": "5rem",
+    "padding": "2rem 1rem",
+}
+
 DATERANGE_SELECTOR = dict(
     buttons=list([
         dict(count=1, label="1M", step="month", stepmode="backward"),
@@ -29,8 +47,7 @@ DATERANGE_SELECTOR = dict(
     ])
 )
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
+app = dash.Dash(external_stylesheets=[dbc.themes.MATERIA], suppress_callback_exceptions=True)
 
 def getFormat(title, xtitle, ytitle, height):
     return dict(
@@ -121,6 +138,11 @@ for fund in funds:
     f1['value'] = fund
     dropdowns.append(f1)
 
+
+currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
+currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
+currentVal = currentVal[['scheme_name', 'cumunits', 'cumsum', 'value', 'pl', 'plpercent']].round(2)
+
 #################################################################
 
 
@@ -136,7 +158,7 @@ def update_figure(selected_value):
     fig.add_trace(go.Scatter(x=x1, y=y1, name='INVESTED VALUE'))
     fig.add_trace(go.Scatter(x=x2, y=y2, name='ACTUAL VALUE'))
 
-    fig.update_layout(getFormat('Historic Value', 'DATE', 'VALUE (INR)', 600))
+    fig.update_layout(getFormat('Historic Value', 'DATE', 'VALUE (INR)', 500))
     fig.update_xaxes(
         rangeselector=DATERANGE_SELECTOR
     )
@@ -156,7 +178,7 @@ def update_figure(selected_value):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x1, y=y1, name='NAV'))
 
-    fig.update_layout(getFormat('Historic NAV', 'DATE', 'NAV', 300))
+    fig.update_layout(getFormat('Historic NAV', 'DATE', 'NAV', 500))
     fig.update_xaxes(
         rangeselector=DATERANGE_SELECTOR
     )
@@ -174,33 +196,77 @@ def update_figure(selected_value):
     fig.add_trace(go.Bar(x=x3, y=y3, name='NAV', marker_color=frame['color']))
 
     fig.update_layout(getFormat('PROFIT/LOSS', 'DATE',
-                                'P&L', 300), barmode='stack')
+                                'P&L', 500), barmode='stack')
     fig.update_xaxes(
         rangeselector=DATERANGE_SELECTOR
     )
     return fig
 
 
-app.layout = html.Div([
-    html.Div([
-        html.Div([
-            html.H2('Dash - MF dashboard',
-                    style={'display': 'flex', 'justify-content': 'center'}),
+sidebar = html.Div(
+    [
+        html.H3("Investscape", className="display-4"),
+        html.Hr(),
+        html.P(
+            "Helps you track your mutual fund investments!", className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Historical Charts", href="/page-1", id="page-1-link"),
+                dbc.NavLink("Summary", href="/page-2", id="page-2-link"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+content = html.Div(id="page-content", style=CONTENT_STYLE)
+
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+@app.callback(
+    [Output(f"page-{i}-link", "active") for i in range(1, 3)],
+    [Input("url", "pathname")],
+)
+def toggle_active_links(pathname):
+    if pathname == "/":
+        return True, False
+    return [pathname == f"/page-{i}" for i in range(1, 3)]
+
+
+
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+def render_page_content(pathname):
+    if pathname in ["/", "/page-1"]:
+        return html.Div([
             html.Div([
-                dcc.Graph(id='graph-nav'),
-                dcc.Graph(id='graph-pl')
-            ])
-        ], className="six columns"),
-        html.Div([
-            html.Div([
-                dcc.Dropdown(id='dropdown', options=dropdowns, value=funds[-1],
-                             style={'margin-left': 'auto', 'margin-right': '0', 'maxWidth': '80%'})
-            ], className="row"),
-            dcc.Graph(id='graph-value')
-        ], className="six columns")
-    ], className="row")
-])
+                dcc.Dropdown(id='dropdown', options=dropdowns, value=funds[-1])
+            ]),
+            dcc.Graph(id='graph-value'),
+            dcc.Graph(id='graph-nav'),
+            dcc.Graph(id='graph-pl')
+        ])
+    elif pathname == "/page-2":
+        fig = go.Figure(data=[
+            go.Bar(x=currentVal['scheme_name'].tolist(), y=currentVal['cumsum'].tolist(), name='Invested'),
+            go.Bar(x=currentVal['scheme_name'].tolist(), y=currentVal['value'].tolist(), name='Current')
+        ])
+        fig.update_layout(getFormat('Funds Summary', 'Fund',
+                                    'Value', 600), barmode='group')
+        return html.Div([
+            dcc.Graph(id='graph-overall', figure=fig)
+        ])
+
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False,dev_tools_ui=False,dev_tools_props_check=False)
