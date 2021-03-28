@@ -14,10 +14,13 @@ from plotly.subplots import make_subplots
 
 from connectgooglesheets import get_transactions_dump
 from historicalnav import getHistoricalNavMap, getNavForDate
+from decouple import config
+from flask import Flask, redirect, request
 
 
-SPREADSHEET_ID = '1mPoXJ3Pv9EmITjFni3Z4dNe2tk8U3yMM0VmUGD8EEPI'
-RANGE_NAME = 'transactions'
+
+SPREADSHEET_ID = config('SPREADSHEET_ID')
+RANGE_NAME = config('RANGE_NAME')
 
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -48,6 +51,7 @@ DATERANGE_SELECTOR = dict(
 )
 
 app = dash.Dash(external_stylesheets=[dbc.themes.MATERIA], suppress_callback_exceptions=True)
+server = app.server
 
 def getFormat(title, xtitle, ytitle, height):
     return dict(
@@ -102,49 +106,51 @@ def getTimeSeriesDf(df):
     filled_df['scheme_name'] = filled_df['scheme_name'].replace(
         to_replace=0, method='ffill')
     filled_df = filled_df.reset_index()
-    filled_df.to_csv('time_series.csv')
+    # filled_df.to_csv('time_series.csv')
     return filled_df
 
 
 ############### CONSTRUCT DATA SOURCE FOR DASHBOARD #############
 
-dump = get_transactions_dump(SPREADSHEET_ID, RANGE_NAME)
-dump.to_csv('transaction_dump.csv')
+def getComponents():
+    dump = get_transactions_dump(SPREADSHEET_ID, RANGE_NAME)
+    dump.to_csv('transaction_dump.csv')
 
-df = getTimeSeriesDf(dump)
-df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
-df = df[df['cumsum'] != 0.0]
+    df = getTimeSeriesDf(dump)
+    df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
+    df = df[df['cumsum'] != 0.0]
 
-navMap = getHistoricalNavMap(df['scheme_code'].unique().tolist())
+    navMap = getHistoricalNavMap(df['scheme_code'].unique().tolist())
 
-df['historicnav'] = df.apply(lambda row: getNavForDate(
-    navMap, row['scheme_code'], str(row['date'])), axis=1)
-df['value'] = df.apply(lambda row: float(
-    row['cumunits']) * row['historicnav'], axis=1)
-df['pl'] = df.apply(lambda row: float(row['value']) -
-                    float(row['cumsum']), axis=1)
+    df['historicnav'] = df.apply(lambda row: getNavForDate(
+        navMap, row['scheme_code'], str(row['date'])), axis=1)
+    df['value'] = df.apply(lambda row: float(
+        row['cumunits']) * row['historicnav'], axis=1)
+    df['pl'] = df.apply(lambda row: float(row['value']) -
+                        float(row['cumsum']), axis=1)
 
-funds = list(df['scheme_name'].unique())
-fundTuples = list(zip(df['scheme_name'].unique(), df['scheme_code'].unique()))
-fundMap = {}
+    funds = list(df['scheme_name'].unique())
+    fundTuples = list(zip(df['scheme_name'].unique(), df['scheme_code'].unique()))
+    fundMap = {}
 
-for fund in fundTuples:
-    fundMap[fund[0]] = fund[1]
+    for fund in fundTuples:
+        fundMap[fund[0]] = fund[1]
 
-dropdowns = []
-for fund in funds:
-    f1 = {}
-    f1['label'] = fund
-    f1['value'] = fund
-    dropdowns.append(f1)
+    dropdowns = []
+    for fund in funds:
+        f1 = {}
+        f1['label'] = fund
+        f1['value'] = fund
+        dropdowns.append(f1)
 
 
-currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
-currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
-currentVal = currentVal[['scheme_name', 'cumunits', 'cumsum', 'value', 'pl', 'plpercent']].round(2)
-
+    currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
+    currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
+    currentVal = currentVal[['scheme_name', 'cumunits', 'cumsum', 'value', 'pl', 'plpercent']].round(2)
+    return df, funds, dropdowns, currentVal 
 #################################################################
 
+df, funds, dropdowns, currentVal = getComponents()
 
 @app.callback(Output('graph-value', 'figure'),
               [Input('dropdown', 'value')])
@@ -169,12 +175,8 @@ def update_figure(selected_value):
 @app.callback(Output('graph-nav', 'figure'),
               [Input('dropdown', 'value')])
 def update_figure(selected_value):
-    nav_data_for_fund = navMap.get(fundMap.get(selected_value))
-    x1, y1 = [], []
-    for key, value in nav_data_for_fund.items():
-        x1.append(key)
-        y1.append(value)
-
+    frame = df.loc[df['scheme_name'] == selected_value]
+    x1, y1 = frame['date'].tolist(), frame['historicnav'].tolist()
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x1, y=y1, name='NAV'))
 
@@ -268,5 +270,4 @@ def render_page_content(pathname):
     )
 
 
-if __name__ == '__main__':
-    app.run_server(debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+app.run_server()

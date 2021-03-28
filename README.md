@@ -31,8 +31,8 @@ Refer  ```transaction_format.csv``` . Project references a Google Sheet, but can
 ## Setting up Google Sheets
 
  1. Follow this [link](https://developers.google.com/sheets/api/quickstart/python) to set up your google account. Place the generated ```credentials.json``` in project root directory.
- 2. Replace the variable ```SPREADSHEET_ID(app.py:18)``` by the value marked by "xxx...xx" in this sample Google Sheets URL ```https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxx/edit```
- 3. Replace the variable ```RANGE_NAME(app.py:19)``` by the tab name of the sheet of interest.
+ 2. Initialize the env variable ```SPREADSHEET_ID``` by the value marked by "xxx...xx" in this sample Google Sheets URL ```https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxx/edit```
+ 3. Initialize the env variable ```RANGE_NAME``` by the tab name of the sheet of interest.
 
 # Run the app
 #### Checkout the repo and set up Virtualenv

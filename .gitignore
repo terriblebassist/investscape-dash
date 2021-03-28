@@ -6,3 +6,4 @@ venv
 *.pickle
 *.json
 !transaction_format.csv
+.idea/**

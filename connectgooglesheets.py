@@ -1,9 +1,11 @@
 import pickle
 import os.path
+import json
 import pandas as pd
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
+from decouple import config
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -17,8 +19,10 @@ def gsheet_api_check(SCOPES):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            secret = json.loads(config('GOOGLE_CREDENTIALS_JSON'))
+            flow = InstalledAppFlow.from_client_config(secret,SCOPE)
+            # .from_client_secrets_file(
+            #     'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
