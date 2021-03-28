@@ -20,7 +20,7 @@ def gsheet_api_check(SCOPES):
             creds.refresh(Request())
         else:
             secret = json.loads(config('GOOGLE_CREDENTIALS_JSON'))
-            flow = InstalledAppFlow.from_client_config(secret,SCOPE)
+            flow = InstalledAppFlow.from_client_config(secret,SCOPES)
             # .from_client_secrets_file(
             #     'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
