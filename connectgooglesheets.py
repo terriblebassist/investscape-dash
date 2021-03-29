@@ -13,12 +13,13 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 def gsheet_api_check(SCOPES):
     creds = None
-    if config('GOOGLE_CREDENTIALS'):
+    try: 
+        config('GOOGLE_CREDENTIALS')
         credsfile = json.loads(config('GOOGLE_CREDENTIALS'))
         with open('gcreds.json', 'w') as fp:
             json.dump(credsfile, fp)
         creds = service_account.Credentials.from_service_account_file("gcreds.json", scopes=SCOPES)
-    else:
+    except:
         if os.path.exists('token.pickle'):
             with open('token.pickle', 'rb') as token:
                 creds = pickle.load(token)

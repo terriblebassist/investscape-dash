@@ -1,4 +1,5 @@
 import dash
+import dash_auth
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -51,6 +52,12 @@ DATERANGE_SELECTOR = dict(
 )
 
 app = dash.Dash(external_stylesheets=[dbc.themes.MATERIA], suppress_callback_exceptions=True)
+auth = dash_auth.BasicAuth(
+    app,
+    {
+        config('ADMIN_USERNAME'): config('ADMIN_PASSWORD')
+    }
+)
 server = app.server
 
 def getFormat(title, xtitle, ytitle, height):
@@ -269,5 +276,5 @@ def render_page_content(pathname):
         ]
     )
 
-if __name__ == "main":
+if __name__ == "__main__":
     app.run_server()
