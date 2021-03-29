@@ -269,5 +269,5 @@ def render_page_content(pathname):
         ]
     )
 
-
-app.run_server()
+if __name__ == "main":
+    app.run_server()
