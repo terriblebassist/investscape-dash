@@ -270,4 +270,4 @@ def render_page_content(pathname):
     )
 
 
-app.run_server(port=os.environ.get('PORT', 5000))
+app.run_server()
