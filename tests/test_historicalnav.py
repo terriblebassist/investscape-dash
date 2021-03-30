@@ -42,7 +42,7 @@ class Test_historical_nav:
         }
         mocker.patch('scripts.historicalnav.modifyDateToWorkingDay',
                      return_value='2021-02-02')
-        
+
         assert historicalnav.getNavForDate(
             mockNavMap, mockSchemeCode, '2021-02-01'
         ) == 50.00
