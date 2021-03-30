@@ -13,11 +13,9 @@ import requests
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
-from connectgooglesheets import get_transactions_dump
-from historicalnav import getHistoricalNavMap, getNavForDate
 from decouple import config
 from flask import Flask, redirect, request
-
+from scripts import connectgooglesheets, historicalnav
 
 
 SPREADSHEET_ID = config('SPREADSHEET_ID')
@@ -117,19 +115,17 @@ def getTimeSeriesDf(df):
     return filled_df
 
 
-############### CONSTRUCT DATA SOURCE FOR DASHBOARD #############
-
 def getComponents():
-    dump = get_transactions_dump(SPREADSHEET_ID, RANGE_NAME)
-    dump.to_csv('transaction_dump.csv')
+    dump = connectgooglesheets.get_transactions_dump(SPREADSHEET_ID, RANGE_NAME)
+    # dump.to_csv('transaction_dump.csv')
 
     df = getTimeSeriesDf(dump)
     df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
     df = df[df['cumsum'] != 0.0]
 
-    navMap = getHistoricalNavMap(df['scheme_code'].unique().tolist())
+    navMap = historicalnav.getHistoricalNavMap(df['scheme_code'].unique().tolist())
 
-    df['historicnav'] = df.apply(lambda row: getNavForDate(
+    df['historicnav'] = df.apply(lambda row: historicalnav.getNavForDate(
         navMap, row['scheme_code'], str(row['date'])), axis=1)
     df['value'] = df.apply(lambda row: float(
         row['cumunits']) * row['historicnav'], axis=1)
@@ -154,10 +150,11 @@ def getComponents():
     currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
     currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
     currentVal = currentVal[['scheme_name', 'cumunits', 'cumsum', 'value', 'pl', 'plpercent']].round(2)
-    return df, funds, dropdowns, currentVal 
-#################################################################
+    return df, funds, dropdowns, currentVal
+
 
 df, funds, dropdowns, currentVal = getComponents()
+
 
 @app.callback(Output('graph-value', 'figure'),
               [Input('dropdown', 'value')])

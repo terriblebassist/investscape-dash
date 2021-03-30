@@ -10,7 +10,7 @@ def getFormattedDate(unformatted_date):
 
 
 def modifyDateToWorkingDay(unformatted_date, navMap):
-    dt = unformatted_date.split('-')
+    dt = unformatted_date.split('-') #YYYY-MM-DD
     decremented_date = date(int(dt[0]), int(dt[1]), int(dt[2]))
     for x in range(1, 8):
         decremented_date -= timedelta(days=1)
@@ -21,12 +21,15 @@ def modifyDateToWorkingDay(unformatted_date, navMap):
     return unformatted_date
 
 
+def get_response_json_from_url(url):
+    return requests.get(url).json()
+
+
 def getHistoricalNavMap(navList):
     navMap = {}
     for schemeCode in navList:
-        url = MFAPI_URL + str(schemeCode)
-        res = requests.get(url)
-        data = res.json()['data']
+        res = get_response_json_from_url(MFAPI_URL+str(schemeCode))
+        data = res['data']
 
         fundMap = {}
         for navRow in data:

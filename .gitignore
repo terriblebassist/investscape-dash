@@ -7,3 +7,5 @@ venv
 *.json
 !transaction_format.csv
 .idea/**
+htmlcov/**
+.coverage
