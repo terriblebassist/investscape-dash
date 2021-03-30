@@ -5,7 +5,7 @@ import pandas as pd
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from decouple import config
+from decouple import config, UndefinedValueError
 from google.oauth2 import service_account
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -13,12 +13,15 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 def gsheet_api_check(SCOPES):
     creds = None
-    try: 
+    try:
         credsfile = json.loads(config('GOOGLE_CREDENTIALS'))
         with open('gcreds.json', 'w') as fp:
             json.dump(credsfile, fp)
-        creds = service_account.Credentials.from_service_account_file("gcreds.json", scopes=SCOPES)
-    except:
+        creds = service_account.Credentials.from_service_account_file(
+            "gcreds.json",
+            scopes=SCOPES
+        )
+    except UndefinedValueError:
         if os.path.exists('token.pickle'):
             with open('token.pickle', 'rb') as token:
                 creds = pickle.load(token)
@@ -27,7 +30,7 @@ def gsheet_api_check(SCOPES):
                 creds.refresh(Request())
             else:
                 secret = json.loads(config('GOOGLE_CREDENTIALS_JSON'))
-                flow = InstalledAppFlow.from_client_config(secret,SCOPES)
+                flow = InstalledAppFlow.from_client_config(secret, SCOPES)
                 creds = flow.run_local_server(port=0)
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
