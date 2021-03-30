@@ -3,21 +3,13 @@ import dash_auth
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table
-import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-import requests
 
 from dash.dependencies import Input, Output
-from plotly.subplots import make_subplots
 
-from connectgooglesheets import get_transactions_dump
-from historicalnav import getHistoricalNavMap, getNavForDate
 from decouple import config
-from flask import Flask, redirect, request
-
+from scripts import connectgooglesheets, historicalnav
 
 
 SPREADSHEET_ID = config('SPREADSHEET_ID')
@@ -51,7 +43,10 @@ DATERANGE_SELECTOR = dict(
     ])
 )
 
-app = dash.Dash(external_stylesheets=[dbc.themes.MATERIA], suppress_callback_exceptions=True)
+app = dash.Dash(
+    external_stylesheets=[dbc.themes.MATERIA],
+    suppress_callback_exceptions=True
+)
 auth = dash_auth.BasicAuth(
     app,
     {
@@ -59,6 +54,7 @@ auth = dash_auth.BasicAuth(
     }
 )
 server = app.server
+
 
 def getFormat(title, xtitle, ytitle, height):
     return dict(
@@ -98,7 +94,10 @@ def getTimeSeriesDf(df):
 
     filled_df = (df.set_index('date')
                  .groupby('scheme_code')
-                 .apply(lambda d: d.reindex(pd.date_range(min(df.date), pd.to_datetime('today'), freq='D')))
+                 .apply(lambda d:
+                        d.reindex(pd.date_range(min(df.date),
+                                                pd.to_datetime('today'),
+                                                freq='D')))
                  .drop('scheme_code', axis=1)
                  .reset_index('scheme_code')
                  .fillna(0))
@@ -117,19 +116,20 @@ def getTimeSeriesDf(df):
     return filled_df
 
 
-############### CONSTRUCT DATA SOURCE FOR DASHBOARD #############
-
 def getComponents():
-    dump = get_transactions_dump(SPREADSHEET_ID, RANGE_NAME)
-    dump.to_csv('transaction_dump.csv')
+    dump = connectgooglesheets.get_transactions_dump(SPREADSHEET_ID,
+                                                     RANGE_NAME)
+    # dump.to_csv('transaction_dump.csv')
 
     df = getTimeSeriesDf(dump)
     df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
     df = df[df['cumsum'] != 0.0]
 
-    navMap = getHistoricalNavMap(df['scheme_code'].unique().tolist())
+    navMap = historicalnav.getHistoricalNavMap(df['scheme_code']
+                                               .unique()
+                                               .tolist())
 
-    df['historicnav'] = df.apply(lambda row: getNavForDate(
+    df['historicnav'] = df.apply(lambda row: historicalnav.getNavForDate(
         navMap, row['scheme_code'], str(row['date'])), axis=1)
     df['value'] = df.apply(lambda row: float(
         row['cumunits']) * row['historicnav'], axis=1)
@@ -137,7 +137,8 @@ def getComponents():
                         float(row['cumsum']), axis=1)
 
     funds = list(df['scheme_name'].unique())
-    fundTuples = list(zip(df['scheme_name'].unique(), df['scheme_code'].unique()))
+    fundTuples = list(zip(df['scheme_name'].unique(),
+                          df['scheme_code'].unique()))
     fundMap = {}
 
     for fund in fundTuples:
@@ -150,18 +151,20 @@ def getComponents():
         f1['value'] = fund
         dropdowns.append(f1)
 
-
     currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
     currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
-    currentVal = currentVal[['scheme_name', 'cumunits', 'cumsum', 'value', 'pl', 'plpercent']].round(2)
-    return df, funds, dropdowns, currentVal 
-#################################################################
+    customview = ['scheme_name', 'cumunits',
+                  'cumsum', 'value', 'pl', 'plpercent']
+    currentVal = currentVal[customview].round(2)
+    return df, funds, dropdowns, currentVal
+
 
 df, funds, dropdowns, currentVal = getComponents()
 
+
 @app.callback(Output('graph-value', 'figure'),
               [Input('dropdown', 'value')])
-def update_figure(selected_value):
+def update_figure_graph_value(selected_value):
 
     frame = df.loc[df['scheme_name'] == selected_value]
     x1, y1 = frame['date'].tolist(), frame['cumsum'].tolist()
@@ -181,7 +184,7 @@ def update_figure(selected_value):
 
 @app.callback(Output('graph-nav', 'figure'),
               [Input('dropdown', 'value')])
-def update_figure(selected_value):
+def update_figure_graph_nav(selected_value):
     frame = df.loc[df['scheme_name'] == selected_value]
     x1, y1 = frame['date'].tolist(), frame['historicnav'].tolist()
     fig = go.Figure()
@@ -196,7 +199,7 @@ def update_figure(selected_value):
 
 @app.callback(Output('graph-pl', 'figure'),
               [Input('dropdown', 'value')])
-def update_figure(selected_value):
+def update_figure_graph_pl(selected_value):
     frame = df.loc[df['scheme_name'] == selected_value]
     frame['color'] = frame.apply(
         lambda x: 'red' if x['pl'] < 0 else 'green', axis=1)
@@ -221,7 +224,8 @@ sidebar = html.Div(
         ),
         dbc.Nav(
             [
-                dbc.NavLink("Historical Charts", href="/page-1", id="page-1-link"),
+                dbc.NavLink("Historical Charts",
+                            href="/page-1", id="page-1-link"),
                 dbc.NavLink("Summary", href="/page-2", id="page-2-link"),
             ],
             vertical=True,
@@ -235,6 +239,7 @@ content = html.Div(id="page-content", style=CONTENT_STYLE)
 
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
+
 @app.callback(
     [Output(f"page-{i}-link", "active") for i in range(1, 3)],
     [Input("url", "pathname")],
@@ -243,7 +248,6 @@ def toggle_active_links(pathname):
     if pathname == "/":
         return True, False
     return [pathname == f"/page-{i}" for i in range(1, 3)]
-
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -259,8 +263,14 @@ def render_page_content(pathname):
         ])
     elif pathname == "/page-2":
         fig = go.Figure(data=[
-            go.Bar(x=currentVal['scheme_name'].tolist(), y=currentVal['cumsum'].tolist(), name='Invested'),
-            go.Bar(x=currentVal['scheme_name'].tolist(), y=currentVal['value'].tolist(), name='Current')
+            go.Bar(
+                x=currentVal['scheme_name'].tolist(),
+                y=currentVal['cumsum'].tolist(),
+                name='Invested'),
+            go.Bar(
+                x=currentVal['scheme_name'].tolist(),
+                y=currentVal['value'].tolist(),
+                name='Current')
         ])
         fig.update_layout(getFormat('Funds Summary', 'Fund',
                                     'Value', 600), barmode='group')
@@ -275,6 +285,7 @@ def render_page_content(pathname):
             html.P(f"The pathname {pathname} was not recognised..."),
         ]
     )
+
 
 if __name__ == "__main__":
     app.run_server()
