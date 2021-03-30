@@ -14,7 +14,6 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 def gsheet_api_check(SCOPES):
     creds = None
     try: 
-        config('GOOGLE_CREDENTIALS')
         credsfile = json.loads(config('GOOGLE_CREDENTIALS'))
         with open('gcreds.json', 'w') as fp:
             json.dump(credsfile, fp)
