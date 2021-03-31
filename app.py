@@ -6,7 +6,7 @@ from scripts import (
 )
 from scripts.dashapp import app
 
-
+server = app.server
 app.layout = dashutils.render_app_layout()
 df = dataframeutils.populate_df_attributes()
 funds = dataframeutils.get_distinct_funds(df)

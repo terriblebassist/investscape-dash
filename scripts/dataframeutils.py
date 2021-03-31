@@ -3,10 +3,6 @@ import pandas as pd
 from decouple import config
 
 
-SPREADSHEET_ID = config('SPREADSHEET_ID')
-RANGE_NAME = config('RANGE_NAME')
-
-
 def create_cumulative_transaction_series_df(df):
     conversions = constants.DF_TYPECAST
     df = df.astype(conversions)
@@ -37,8 +33,8 @@ def create_cumulative_transaction_series_df(df):
 
 
 def populate_df_attributes():
-    dump = connectgooglesheets.get_transactions_dump(SPREADSHEET_ID,
-                                                     RANGE_NAME)
+    dump = connectgooglesheets.get_transactions_dump(config('SPREADSHEET_ID'),
+                                                     config('RANGE_NAME'))
     # dump.to_csv('transaction_dump.csv')
 
     df = create_cumulative_transaction_series_df(dump)

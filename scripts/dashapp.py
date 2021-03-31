@@ -14,4 +14,3 @@ auth = dash_auth.BasicAuth(
         config('ADMIN_USERNAME'): config('ADMIN_PASSWORD')
     }
 )
-server = app.server
