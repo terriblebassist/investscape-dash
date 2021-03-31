@@ -1,18 +1,6 @@
-
-## Table of Contents  
-- [Description]("#description")
-- [Prerequisites]("#prerequisites")
-- [Running the app]("#running")
-- [Sample Heroku deployment]("#sample")
-
-<a name="description" />
-
 # Welcome to Investscape!
 
 An app designed using [dash](https://dash.plotly.com/), which provides a dashboard through which you can track your mutual fund (India) investments.
-
-  
-<a name="prerequisites" />
 
 # Prerequisites
 - Python 3
@@ -57,7 +45,7 @@ Initialize the following environment variables in your ecosystem, apart from the
 3.  **SPREADSHEET_ID** : the value marked by "xxx...xx" in this sample Google Sheets URL ```https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxx/edit```
 4.  **RANGE_NAME** : name of the sheet of interest inside the Google sheet.
 
-  <a name="running" />
+
 # Running the app
 #### Checkout the repo and set up Virtualenv
 1.  `git clone git@github.com:terriblebassist/investscape-dash.git`
@@ -65,13 +53,12 @@ Initialize the following environment variables in your ecosystem, apart from the
 3.  `virtualenv venv`
 4.  `source venv/bin/activate`
 
-#### Install dependencies and run app
+# Install dependencies and run app
 1.  `pip install -r requirements.txt`
 2.  `python app.py`
 
-<a name="sample" />
-# Here's how it looks!
 
+# Here's how it looks!
 ##### username :  ```test```  
 ##### password :  ```test1234```  
 Sample Heroku deployment [HERE](https://investscape-dash-int.herokuapp.com)
