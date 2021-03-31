@@ -53,7 +53,7 @@ Initialize the following environment variables in your ecosystem, apart from the
 3.  `virtualenv venv`
 4.  `source venv/bin/activate`
 
-# Install dependencies and run app
+#### Install dependencies and run app
 1.  `pip install -r requirements.txt`
 2.  `python app.py`
 
