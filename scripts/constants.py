@@ -37,3 +37,28 @@ DF_TYPECAST = {
     'value': float,
     'units': float
 }
+GRAPH_FORMAT = dict(
+        title='title',
+        hovermode="x",
+        hoverdistance=100,
+        spikedistance=1000,
+        legend=dict(
+            itemclick="toggleothers",
+            itemdoubleclick="toggle",
+        ),
+        xaxis=dict(
+            title='xtitle',
+            showspikes=True,
+            spikethickness=2,
+            spikedash="dot",
+            spikecolor="#999999",
+            spikemode="across",
+            showgrid=False
+        ),
+        yaxis=dict(
+            title='ytitle',
+            showgrid=False,
+        ),
+        template='simple_white',
+        height='height'
+    )
