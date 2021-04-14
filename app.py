@@ -65,7 +65,7 @@ def update_figure_graph_pl(selected_value):
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return True, False
+        return False, False, True
     return [pathname == f"/page-{i}" for i in range(1, 4)]
 
 
