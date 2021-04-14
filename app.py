@@ -74,10 +74,7 @@ def render_page_content(pathname):
     if pathname in ["/", "/page-1"]:
         return dashutils.get_historic_page_layout(dropdowns, funds)
     elif pathname == "/page-2":
-        x = currentVal['scheme_name'].tolist()
-        y1 = currentVal['cumsum'].tolist()
-        y2 = currentVal['value'].tolist()
-        return dashutils.get_summary_page_layout(x, y1, y2)
+        return dashutils.get_tabular_summary(currentVal)
     return dashutils.get_error_messsage(pathname)
 
 
