@@ -1,3 +1,5 @@
+from dash_table.Format import Format
+
 MFAPI_URL = 'https://api.mfapi.in/mf/'
 MFAPI_DATA = 'data'
 MFAPI_DATE = 'date'
@@ -62,3 +64,40 @@ GRAPH_FORMAT = dict(
         template='simple_white',
         height='height'
     )
+TABULAR_VIEW = [
+    {'name': 'Scheme', 'id': 'scheme_name'},
+    {'name': 'Units', 'id': 'cumunits'},
+    {'name': 'Invested', 'id': 'cumsum', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'Current', 'id': 'value', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'P/L', 'id': 'pl', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'P/L%', 'id': 'plpercent'}
+]
+
+TABLE_HEADER_STYLE = {
+    'backgroundColor': 'rgb(230, 230, 230)',
+    'fontWeight': 'bold',
+    'border': '1px solid black'
+}
+TABLE_CELL_STYLE = {
+    'border': '1px solid grey',
+    'whiteSpace': 'normal',
+    'height': 'auto',
+    'textAlign': 'center',
+    'fontSize': 16
+}
+TABLE_STYLE = {
+    'maxHeight': '700px',
+    'overflowY': 'scroll'
+}
+TABLE_CONDITIONAL_STYLE = [
+    {
+        'if': {'row_index': 'odd'},
+        'backgroundColor': 'rgb(248, 248, 248)'
+    }
+]
+STYLE_CENTRE_TEXT = {
+    'text-align': 'center'
+}

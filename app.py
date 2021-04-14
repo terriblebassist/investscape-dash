@@ -60,24 +60,23 @@ def update_figure_graph_pl(selected_value):
 
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 3)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
         return True, False
-    return [pathname == f"/page-{i}" for i in range(1, 3)]
+    return [pathname == f"/page-{i}" for i in range(1, 4)]
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
-    if pathname in ["/", "/page-1"]:
+    if pathname == "/page-1":
         return dashutils.get_historic_page_layout(dropdowns, funds)
     elif pathname == "/page-2":
-        x = currentVal['scheme_name'].tolist()
-        y1 = currentVal['cumsum'].tolist()
-        y2 = currentVal['value'].tolist()
-        return dashutils.get_summary_page_layout(x, y1, y2)
+        return dashutils.get_tabular_summary(currentVal)
+    elif pathname in ["/", "/page-3"]:
+        return dashutils.get_totals(currentVal)
     return dashutils.get_error_messsage(pathname)
 
 
