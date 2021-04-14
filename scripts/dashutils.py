@@ -16,29 +16,26 @@ def graphformat(title, xtitle, ytitle, height):
 
 
 def render_app_layout():
-    sidebar = html.Div(
-        [
-            html.H3("Investscape", className="display-4"),
-            html.Hr(),
-            html.P(
-                "Helps you track your mutual fund investments!",
-                className="lead"
-            ),
-            dbc.Nav(
-                [
-                    dbc.NavLink("Summary", href="/page-3",
-                                id="page-3-link"),
-                    dbc.NavLink("Historical Charts",
-                                href="/page-1", id="page-1-link"),
-                    dbc.NavLink("Charts", href="/page-2",
-                                id="page-2-link"),
-                ],
-                vertical=True,
-                pills=True,
-            ),
-        ],
-        style=constants.SIDEBAR_STYLE,
-    )
+    sidebar = html.Div([
+        html.H3("Investscape", className="display-4"),
+        html.Hr(),
+        html.P(
+            "Helps you track your mutual fund investments!",
+            className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Summary", href="/page-3",
+                            id="page-3-link"),
+                dbc.NavLink("Historical Charts",
+                            href="/page-1", id="page-1-link"),
+                dbc.NavLink("Charts", href="/page-2",
+                            id="page-2-link"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ], style=constants.SIDEBAR_STYLE)
 
     content = html.Div(id="page-content", style=constants.CONTENT_STYLE)
     return html.Div([dcc.Location(id="url"), sidebar, content])
@@ -156,13 +153,7 @@ def get_totals(df):
         ]),
         html.Hr(),
         dbc.Row([
-            dbc.Col(
-                get_bootstrap_card(totalpl, "P/L", isprofit),
-                width=6
-            ),
-            dbc.Col(
-                get_bootstrap_card(pl, "P/L%", isprofit),
-                width=6
-            )
+            dbc.Col(get_bootstrap_card(totalpl, "P/L", isprofit), width=6),
+            dbc.Col(get_bootstrap_card(pl, "P/L%", isprofit), width=6)
         ])
     ])
