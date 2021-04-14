@@ -71,11 +71,11 @@ def toggle_active_links(pathname):
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
-    if pathname in ["/", "/page-1"]:
+    if pathname == "/page-1":
         return dashutils.get_historic_page_layout(dropdowns, funds)
     elif pathname == "/page-2":
         return dashutils.get_tabular_summary(currentVal)
-    elif pathname == "/page-3":
+    elif pathname in ["/", "/page-3"]:
         return dashutils.get_totals(currentVal)
     return dashutils.get_error_messsage(pathname)
 

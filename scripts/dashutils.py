@@ -26,12 +26,12 @@ def render_app_layout():
             ),
             dbc.Nav(
                 [
+                    dbc.NavLink("Summary", href="/page-3",
+                                id="page-3-link"),
                     dbc.NavLink("Historical Charts",
                                 href="/page-1", id="page-1-link"),
                     dbc.NavLink("Charts", href="/page-2",
                                 id="page-2-link"),
-                    dbc.NavLink("Summary", href="/page-3",
-                                id="page-3-link"),
                 ],
                 vertical=True,
                 pills=True,
@@ -139,7 +139,7 @@ def get_totals(df):
 
     return html.Div([
         dbc.Row(
-            html.H4("TOTAL", className="display-4"),
+            html.H4("Holdings", className="display-4"),
             justify="center",
             align="center"
         ),
