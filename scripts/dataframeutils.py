@@ -74,4 +74,6 @@ def extract_stats(df):
     customview = ['scheme_name', 'cumunits',
                   'cumsum', 'value', 'pl', 'plpercent']
     currentVal = currentVal[customview].round(2)
+    round_cols = ['cumsum', 'value', 'pl']
+    currentVal[round_cols] = currentVal[round_cols].round(0)
     return currentVal

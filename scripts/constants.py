@@ -1,3 +1,5 @@
+from dash_table.Format import Format
+
 MFAPI_URL = 'https://api.mfapi.in/mf/'
 MFAPI_DATA = 'data'
 MFAPI_DATE = 'date'
@@ -65,9 +67,12 @@ GRAPH_FORMAT = dict(
 TABULAR_VIEW = [
     {'name': 'Scheme', 'id': 'scheme_name'},
     {'name': 'Units', 'id': 'cumunits'},
-    {'name': 'Invested', 'id': 'cumsum'},
-    {'name': 'Current', 'id': 'value'},
-    {'name': 'P/L', 'id': 'pl'},
+    {'name': 'Invested', 'id': 'cumsum', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'Current', 'id': 'value', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'P/L', 'id': 'pl', 'type': 'numeric',
+     'format': Format(group=',')},
     {'name': 'P/L%', 'id': 'plpercent'}
 ]
 
@@ -93,3 +98,6 @@ TABLE_CONDITIONAL_STYLE = [
         'backgroundColor': 'rgb(248, 248, 248)'
     }
 ]
+STYLE_CENTRE_TEXT = {
+    'text-align': 'center'
+}

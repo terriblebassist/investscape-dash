@@ -28,8 +28,10 @@ def render_app_layout():
                 [
                     dbc.NavLink("Historical Charts",
                                 href="/page-1", id="page-1-link"),
-                    dbc.NavLink("Summary", href="/page-2",
+                    dbc.NavLink("Charts", href="/page-2",
                                 id="page-2-link"),
+                    dbc.NavLink("Summary", href="/page-3",
+                                id="page-3-link"),
                 ],
                 vertical=True,
                 pills=True,
@@ -76,6 +78,18 @@ def get_historic_page_layout(dropdowns, funds):
     ])
 
 
+def get_bootstrap_card(var, cardheader, color):
+    return dbc.Card([
+                    dbc.CardHeader(
+                        cardheader,
+                        style=constants.STYLE_CENTRE_TEXT
+                    ),
+                    dbc.CardBody([
+                        html.H4(f"{var:,}", className="card-text"),
+                    ], style=constants.STYLE_CENTRE_TEXT),
+                    ], color=color, outline=True)
+
+
 def get_tabular_summary(df):
     x = df['scheme_name'].tolist()
     y1 = df['cumsum'].tolist()
@@ -89,7 +103,7 @@ def get_tabular_summary(df):
 
     return html.Div([
         dbc.Row(
-            html.H4("SUMMARY", className="display-6"),
+            html.H4("SUMMARY", className="display-4"),
             justify="center",
             align="center"
         ),
@@ -111,5 +125,44 @@ def get_tabular_summary(df):
         html.Hr(),
         html.Div([
             dcc.Graph(id='graph-overall', figure=fig)
+        ])
+    ])
+
+
+def get_totals(df):
+    totalsum = int(df['cumsum'].sum())
+    totalcurr = int(df['value'].sum())
+    totalpl = int(totalcurr-totalsum)
+    pl = round(totalpl*100/totalsum, 2)
+
+    isprofit = "success" if totalpl > 0 else "danger"
+
+    return html.Div([
+        dbc.Row(
+            html.H4("TOTAL", className="display-4"),
+            justify="center",
+            align="center"
+        ),
+        html.Hr(),
+        dbc.Row([
+            dbc.Col(
+                get_bootstrap_card(totalsum, "Invested Value", "dark"),
+                width=6
+            ),
+            dbc.Col(
+                get_bootstrap_card(totalcurr, "Current Value", "dark"),
+                width=6
+            ),
+        ]),
+        html.Hr(),
+        dbc.Row([
+            dbc.Col(
+                get_bootstrap_card(totalpl, "P/L", isprofit),
+                width=6
+            ),
+            dbc.Col(
+                get_bootstrap_card(pl, "P/L%", isprofit),
+                width=6
+            )
         ])
     ])
