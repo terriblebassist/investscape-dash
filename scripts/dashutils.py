@@ -39,7 +39,8 @@ def render_app_layout():
         fixed="top",
     )
 
-    content = html.Div(id="page-content", style=constants.CONTENT_STYLE)
+    content = html.Div(id="page-content", style=constants.CONTENT_STYLE,
+                       className="container-lg mx-auto shadow")
     return html.Div([dcc.Location(id="url"), sidebar, content])
 
 
@@ -68,21 +69,26 @@ def get_error_messsage(pathname):
 
 def get_historic_page_layout(dropdowns, funds):
     return html.Div([
-        dbc.Row([
-            dbc.Col([
-                html.P("SELECT FUND:", className="lead")
-            ], width=1),
-            dbc.Col([
-                dcc.Dropdown(id='dropdown', options=dropdowns,
-                             value=funds[-1])
-            ], width=11)
-        ]),
-        html.Hr(style=constants.SEPARATOR_STYLE),
-        dcc.Graph(id='graph-value'),
-        html.Hr(style=constants.SEPARATOR_STYLE),
-        dcc.Graph(id='graph-nav'),
-        html.Hr(style=constants.SEPARATOR_STYLE),
-        dcc.Graph(id='graph-pl')
+        html.Div([
+            dbc.Row([
+                dbc.Col([
+                    html.P("SELECT FUND :", className="lead")
+                ], width=1, align="center"),
+                dbc.Col([
+                    dcc.Dropdown(id='dropdown', options=dropdowns,
+                                 value=funds[-1])
+                ], width=11, align="center")
+            ]),
+        ], className="container-fluid py-3 shadow"),
+        html.Div([
+            dcc.Graph(id='graph-value'),
+        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
+        html.Div([
+            dcc.Graph(id='graph-nav'),
+        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
+        html.Div([
+            dcc.Graph(id='graph-pl')
+        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
     ])
 
 
@@ -123,11 +129,13 @@ def get_tabular_summary(df):
                 sort_action="native",
                 filter_action='native',
             )
-        ]),
-        html.Hr(style=constants.SEPARATOR_STYLE),
+        ], className="container-fluid py-3 shadow"),
         html.Div([
             dcc.Graph(id='graph-overall', figure=fig)
-        ])
+        ],
+            className="container-fluid py-3 shadow",
+            style={'margin-top': '2rem'}
+        )
     ])
 
 

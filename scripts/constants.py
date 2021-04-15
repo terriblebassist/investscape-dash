@@ -20,8 +20,6 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
 }
 CONTENT_STYLE = {
-    "margin-left": "10rem",
-    "margin-right": "10rem",
     "margin-top": "7rem",
     "padding": "2rem 1rem",
 }
