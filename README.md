@@ -59,6 +59,4 @@ Initialize the following environment variables in your ecosystem, apart from the
 
 
 # Here's how it looks!
-##### username :  ```test```  
-##### password :  ```test1234```  
 Sample Heroku deployment [HERE](https://investscape-dash-int.herokuapp.com)
