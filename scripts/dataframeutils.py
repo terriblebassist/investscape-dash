@@ -51,7 +51,7 @@ def populate_df_attributes():
         row['cumunits']) * row['historicnav'], axis=1)
     df['pl'] = df.apply(lambda row: float(row['value']) -
                         float(row['cumsum']), axis=1)
-    return df
+    return df, dump
 
 
 def get_distinct_funds(df):

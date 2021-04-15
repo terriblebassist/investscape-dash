@@ -3,7 +3,9 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
+import plotly.express as px
 import dash_table
+import pandas as pd
 
 
 def graphformat(title, xtitle, ytitle, height):
@@ -22,10 +24,12 @@ def render_app_layout():
                 [
                     dbc.NavLink("Home", href="/page-1",
                                 id="page-1-link"),
-                    dbc.NavLink("Summary", href="/page-2",
+                    dbc.NavLink("Charts", href="/page-2",
                                 id="page-2-link"),
                     dbc.NavLink("Historical Charts",
                                 href="/page-3", id="page-3-link"),
+                    dbc.NavLink("Transactions",
+                                href="/page-4", id="page-4-link"),
                 ],
                 pills=True,
                 fill=True,
@@ -116,27 +120,30 @@ def get_tabular_summary(df):
     fig.update_layout(graphformat('Funds', 'Fund',
                                   'Value', 600), barmode='group')
 
+    pii = px.pie(df, values='cumsum', names='scheme_name',
+                 title='Invested', labels={'cumsum': 'Amount'})
+    pic = px.pie(df, values='value', names='scheme_name',
+                 title='Current', labels={'value': 'Amount'})
+    pii.update_layout(title_x=0.5)
+    pic.update_layout(title_x=0.5)
     return html.Div([
-        html.Div([
-            dash_table.DataTable(
-                id='table',
-                columns=constants.TABULAR_VIEW,
-                data=df.to_dict('records'),
-                style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
-                style_header=constants.TABLE_HEADER_STYLE,
-                style_cell=constants.TABLE_CELL_STYLE,
-                style_table=constants.TABLE_STYLE,
-                fixed_rows={'headers': True},
-                sort_action="native",
-                filter_action='native',
-            )
-        ], className="container-fluid py-3 shadow"),
         html.Div([
             dcc.Graph(id='graph-overall', figure=fig)
         ],
-            className="container-fluid py-3 shadow",
-            style={'margin-top': '2rem'}
-        )
+            className="container-fluid py-3 my-3 shadow"
+        ),
+        html.Div([
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(figure=pii)
+                ]),
+                dbc.Col([
+                    dcc.Graph(figure=pic)
+                ]),
+            ])
+        ],
+            className="container-fluid py-3 my-3 shadow"
+        ),
     ])
 
 
@@ -157,5 +164,44 @@ def get_totals(df):
         dbc.CardDeck([
             get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
             get_bootstrap_card(pl, "Profit/Loss %", isprofit),
-        ])
+        ]),
+        html.Div([
+            dash_table.DataTable(
+                id='table',
+                columns=constants.TABULAR_SUMMARY_VIEW,
+                data=df.to_dict('records'),
+                style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
+                style_header=constants.TABLE_HEADER_STYLE,
+                style_cell=constants.TABLE_CELL_STYLE,
+                style_table=constants.TABLE_STYLE,
+                fixed_rows={'headers': True},
+                sort_action="native",
+                filter_action='native',
+            )
+        ], className="container-fluid py-3 my-3 shadow")
+    ])
+
+
+def get_transactions_page(sheet):
+    sheet = sheet[['transaction_date', 'scheme_code',
+                   'scheme_name', 'value', 'units']]
+    sheet['epoch'] = pd.to_datetime(sheet['transaction_date'],
+                                    format='%d/%m/%Y')
+    sheet['epoch'] = sheet['epoch'].astype('int64')
+    sheet['serial_no'] = sheet['epoch'].rank(method='first')
+    return html.Div([
+        dash_table.DataTable(
+            id='table',
+            columns=constants.TABULAR_TRANSACTION_VIEW,
+            data=sheet.to_dict('records'),
+            style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
+            style_header=constants.TABLE_HEADER_STYLE,
+            style_cell=constants.TABLE_CELL_STYLE,
+            style_table=constants.TABLE_STYLE,
+            fixed_rows={'headers': True},
+            sort_action="native",
+            filter_action='native',
+            page_size=13,
+            sort_by=[{'column_id': 'epoch', 'direction': 'desc'}],
+        )
     ])
