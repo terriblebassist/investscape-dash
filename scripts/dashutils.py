@@ -96,7 +96,8 @@ def get_bootstrap_card(var, cardheader, color):
     return dbc.Card([
                     dbc.CardHeader(
                         cardheader,
-                        style=constants.STYLE_CENTRE_TEXT
+                        style=constants.STYLE_CENTRE_TEXT,
+                        className='lead'
                     ),
                     dbc.CardBody([
                         html.H4(f"{var:,}", className="card-text"),
