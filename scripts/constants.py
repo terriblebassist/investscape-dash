@@ -101,8 +101,3 @@ TABLE_CONDITIONAL_STYLE = [
 STYLE_CENTRE_TEXT = {
     'text-align': 'center'
 }
-SEPARATOR_STYLE = {
-    'height': '0px',
-    'border': 'none',
-    'border-top': '1px solid black'
-}

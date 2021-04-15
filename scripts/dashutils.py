@@ -20,12 +20,12 @@ def render_app_layout():
         children=[
             dbc.Nav(
                 [
-                    dbc.NavLink("Home", href="/page-3",
-                                id="page-3-link"),
-                    dbc.NavLink("Historical Charts",
-                                href="/page-1", id="page-1-link"),
+                    dbc.NavLink("Home", href="/page-1",
+                                id="page-1-link"),
                     dbc.NavLink("Summary", href="/page-2",
                                 id="page-2-link"),
+                    dbc.NavLink("Historical Charts",
+                                href="/page-3", id="page-3-link"),
                 ],
                 pills=True,
                 fill=True,
@@ -154,7 +154,7 @@ def get_totals(df):
         ]),
         html.Hr(),
         dbc.CardDeck([
-            get_bootstrap_card(totalpl, "P/L", isprofit),
-            get_bootstrap_card(pl, "P/L%", isprofit),
+            get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
+            get_bootstrap_card(pl, "Profit/Loss %", isprofit),
         ])
     ])
