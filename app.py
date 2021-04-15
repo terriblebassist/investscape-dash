@@ -8,7 +8,7 @@ from scripts.dashapp import app
 
 server = app.server
 app.layout = dashutils.render_app_layout()
-df = dataframeutils.populate_df_attributes()
+df, sheet = dataframeutils.populate_df_attributes()
 funds = dataframeutils.get_distinct_funds(df)
 dropdowns = dataframeutils.get_dropdown_map(funds)
 currentVal = dataframeutils.extract_stats(df)
@@ -60,13 +60,13 @@ def update_figure_graph_pl(selected_value):
 
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return True, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 4)]
+        return True, False, False, False
+    return [pathname == f"/page-{i}" for i in range(1, 5)]
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -77,8 +77,10 @@ def render_page_content(pathname):
         return dashutils.get_tabular_summary(currentVal)
     elif pathname == "/page-3":
         return dashutils.get_historic_page_layout(dropdowns, funds)
+    elif pathname == "/page-4":
+        return dashutils.get_transactions_page(sheet)
     return dashutils.get_error_messsage(pathname)
 
 
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)

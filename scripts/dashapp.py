@@ -8,9 +8,11 @@ app = dash.Dash(
     external_stylesheets=[dbc.themes.MATERIA],
     suppress_callback_exceptions=True
 )
-auth = dash_auth.BasicAuth(
-    app,
-    {
-        config('ADMIN_USERNAME'): config('ADMIN_PASSWORD')
-    }
-)
+
+if config('PROFILE', default='int') == 'PROD':
+    auth = dash_auth.BasicAuth(
+        app,
+        {
+            config('ADMIN_USERNAME'): config('ADMIN_PASSWORD')
+        }
+    )
