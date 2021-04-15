@@ -26,7 +26,7 @@ def update_figure_graph_value(selected_value):
     fig.add_trace(go.Scatter(x=x1, y=y1, name='INVESTED VALUE'))
     fig.add_trace(go.Scatter(x=x2, y=y2, name='ACTUAL VALUE'))
     fig = dashutils.set_figure_attributes(fig, 'Historic Value', 'DATE',
-                                          'VALUE (INR)', 500)
+                                          'VALUE (INR)', 600)
 
     return fig
 
@@ -40,7 +40,7 @@ def update_figure_graph_nav(selected_value):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x1, y=y1, name='NAV'))
     fig = dashutils.set_figure_attributes(fig, 'Historic NAV', 'DATE',
-                                          'NAV', 500)
+                                          'NAV (INR)', 600)
     return fig
 
 
@@ -54,8 +54,8 @@ def update_figure_graph_pl(selected_value):
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=x3, y=y3, name='NAV', marker_color=frame['color']))
-    fig = dashutils.set_figure_attributes(fig, 'PROFIT/LOSS', 'DATE',
-                                          'P&L', 500, 'stack')
+    fig = dashutils.set_figure_attributes(fig, 'Profit/Loss', 'DATE',
+                                          'P&L (INR)', 600, 'stack')
     return fig
 
 
