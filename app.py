@@ -65,18 +65,18 @@ def update_figure_graph_pl(selected_value):
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return False, False, True
+        return True, False, False
     return [pathname == f"/page-{i}" for i in range(1, 4)]
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
-    if pathname == "/page-1":
-        return dashutils.get_historic_page_layout(dropdowns, funds)
+    if pathname in ["/", "/page-1"]:
+        return dashutils.get_totals(currentVal)
     elif pathname == "/page-2":
         return dashutils.get_tabular_summary(currentVal)
-    elif pathname in ["/", "/page-3"]:
-        return dashutils.get_totals(currentVal)
+    elif pathname == "/page-3":
+        return dashutils.get_historic_page_layout(dropdowns, funds)
     return dashutils.get_error_messsage(pathname)
 
 
