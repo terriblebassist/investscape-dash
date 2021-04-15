@@ -39,9 +39,9 @@ Refer ```docs/transaction_format.csv``` .
 4. On first run, you will be redirected to Google's login page and asked to permit the usage of Google Sheets API.
 
 ## Setting up env variables
-Initialize the following environment variables in your ecosystem, apart from the Google credentials env variable initialised from the above section. (**.env** file in root folder if running locally)
-1.  **ADMIN_USERNAME** : username for accessing application
-2.  **ADMIN_PASSWORD**: password for accessing application
+Initialize the following environment variables in your ecosystem, apart from the Google credentials env variable initialised from the above section. (**.env** file in root folder if running locally). Some env vars are optional (only used when PROFILE = "PROD", for app security).
+1.  **ADMIN_USERNAME** (optional): username for accessing application
+2.  **ADMIN_PASSWORD** (optional): password for accessing application
 3.  **SPREADSHEET_ID** : the value marked by "xxx...xx" in this sample Google Sheets URL ```https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxx/edit```
 4.  **RANGE_NAME** : name of the sheet of interest inside the Google sheet.
 
