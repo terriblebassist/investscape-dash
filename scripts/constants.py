@@ -20,8 +20,9 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
 }
 CONTENT_STYLE = {
-    "margin-left": "25rem",
-    "margin-right": "5rem",
+    "margin-left": "10rem",
+    "margin-right": "10rem",
+    "margin-top": "7rem",
     "padding": "2rem 1rem",
 }
 DATERANGE_SELECTOR = dict(
@@ -41,6 +42,7 @@ DF_TYPECAST = {
 }
 GRAPH_FORMAT = dict(
         title='title',
+        title_x=0.5,
         hovermode="x",
         hoverdistance=100,
         spikedistance=1000,
@@ -100,4 +102,9 @@ TABLE_CONDITIONAL_STYLE = [
 ]
 STYLE_CENTRE_TEXT = {
     'text-align': 'center'
+}
+SEPARATOR_STYLE = {
+    'height': '0px',
+    'border': 'none',
+    'border-top': '1px solid black'
 }

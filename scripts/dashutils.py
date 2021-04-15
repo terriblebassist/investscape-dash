@@ -16,26 +16,28 @@ def graphformat(title, xtitle, ytitle, height):
 
 
 def render_app_layout():
-    sidebar = html.Div([
-        html.H3("Investscape", className="display-4"),
-        html.Hr(),
-        html.P(
-            "Helps you track your mutual fund investments!",
-            className="lead"
-        ),
-        dbc.Nav(
-            [
-                dbc.NavLink("Summary", href="/page-3",
-                            id="page-3-link"),
-                dbc.NavLink("Historical Charts",
-                            href="/page-1", id="page-1-link"),
-                dbc.NavLink("Charts", href="/page-2",
-                            id="page-2-link"),
-            ],
-            vertical=True,
-            pills=True,
-        ),
-    ], style=constants.SIDEBAR_STYLE)
+    sidebar = dbc.NavbarSimple(
+        children=[
+            dbc.Nav(
+                [
+                    dbc.NavLink("Home", href="/page-3",
+                                id="page-3-link"),
+                    dbc.NavLink("Historical Charts",
+                                href="/page-1", id="page-1-link"),
+                    dbc.NavLink("Summary", href="/page-2",
+                                id="page-2-link"),
+                ],
+                pills=True,
+                fill=True,
+            ),
+        ],
+        brand="Investscape",
+        brand_href="/",
+        color="dark",
+        dark=True,
+        fluid=True,
+        fixed="top",
+    )
 
     content = html.Div(id="page-content", style=constants.CONTENT_STYLE)
     return html.Div([dcc.Location(id="url"), sidebar, content])
@@ -66,11 +68,20 @@ def get_error_messsage(pathname):
 
 def get_historic_page_layout(dropdowns, funds):
     return html.Div([
-        html.Div([
-            dcc.Dropdown(id='dropdown', options=dropdowns, value=funds[-1])
+        dbc.Row([
+            dbc.Col([
+                html.P("SELECT FUND:", className="lead")
+            ], width=1),
+            dbc.Col([
+                dcc.Dropdown(id='dropdown', options=dropdowns,
+                             value=funds[-1])
+            ], width=11)
         ]),
+        html.Hr(style=constants.SEPARATOR_STYLE),
         dcc.Graph(id='graph-value'),
+        html.Hr(style=constants.SEPARATOR_STYLE),
         dcc.Graph(id='graph-nav'),
+        html.Hr(style=constants.SEPARATOR_STYLE),
         dcc.Graph(id='graph-pl')
     ])
 
@@ -99,12 +110,6 @@ def get_tabular_summary(df):
                                   'Value', 600), barmode='group')
 
     return html.Div([
-        dbc.Row(
-            html.H4("SUMMARY", className="display-4"),
-            justify="center",
-            align="center"
-        ),
-        html.Hr(),
         html.Div([
             dash_table.DataTable(
                 id='table',
@@ -119,7 +124,7 @@ def get_tabular_summary(df):
                 filter_action='native',
             )
         ]),
-        html.Hr(),
+        html.Hr(style=constants.SEPARATOR_STYLE),
         html.Div([
             dcc.Graph(id='graph-overall', figure=fig)
         ])
@@ -135,25 +140,13 @@ def get_totals(df):
     isprofit = "success" if totalpl > 0 else "danger"
 
     return html.Div([
-        dbc.Row(
-            html.H4("Holdings", className="display-4"),
-            justify="center",
-            align="center"
-        ),
-        html.Hr(),
-        dbc.Row([
-            dbc.Col(
-                get_bootstrap_card(totalsum, "Invested Value", "dark"),
-                width=6
-            ),
-            dbc.Col(
-                get_bootstrap_card(totalcurr, "Current Value", "dark"),
-                width=6
-            ),
+        dbc.CardDeck([
+            get_bootstrap_card(totalsum, "Invested Value", "dark"),
+            get_bootstrap_card(totalcurr, "Current Value", "dark"),
         ]),
         html.Hr(),
-        dbc.Row([
-            dbc.Col(get_bootstrap_card(totalpl, "P/L", isprofit), width=6),
-            dbc.Col(get_bootstrap_card(pl, "P/L%", isprofit), width=6)
+        dbc.CardDeck([
+            get_bootstrap_card(totalpl, "P/L", isprofit),
+            get_bootstrap_card(pl, "P/L%", isprofit),
         ])
     ])
