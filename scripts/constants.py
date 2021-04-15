@@ -64,7 +64,7 @@ GRAPH_FORMAT = dict(
         template='simple_white',
         height='height'
     )
-TABULAR_VIEW = [
+TABULAR_SUMMARY_VIEW = [
     {'name': 'Scheme', 'id': 'scheme_name'},
     {'name': 'Units', 'id': 'cumunits'},
     {'name': 'Invested', 'id': 'cumsum', 'type': 'numeric',
@@ -101,3 +101,12 @@ TABLE_CONDITIONAL_STYLE = [
 STYLE_CENTRE_TEXT = {
     'text-align': 'center'
 }
+TABULAR_TRANSACTION_VIEW = [
+    {'name': 'S.No.', 'id': 'serial_no'},
+    {'name': 'Date', 'id': 'transaction_date'},
+    {'name': 'Scheme Code', 'id': 'scheme_code'},
+    {'name': 'Scheme', 'id': 'scheme_name'},
+    {'name': 'Amount', 'id': 'value', 'type': 'numeric',
+     'format': Format(group=',')},
+    {'name': 'Units', 'id': 'units'},
+]
