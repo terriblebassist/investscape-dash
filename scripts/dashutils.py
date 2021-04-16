@@ -134,13 +134,15 @@ def get_tabular_summary(df):
         go.Bar(x=x, y=y1, name='Invested'),
         go.Bar(x=x, y=y2, name='Current')
     ])
-    fig.update_layout(graphformat('Funds', 'Fund',
+    fig.update_layout(graphformat('FUNDS', 'Fund',
                                   'Value'), barmode='group')
 
     pii = px.pie(df, values='cumsum', names='scheme_name',
-                 title='Invested', labels={'cumsum': 'Amount'})
+                 title=f"INVESTED : {int(sum(y1)):,}",
+                 labels={'cumsum': 'Amount'}, hole=0.2)
     pic = px.pie(df, values='value', names='scheme_name',
-                 title='Current', labels={'value': 'Amount'})
+                 title=f"CURRENT : {int(sum(y2)):,}",
+                 labels={'value': 'Amount'}, hole=0.2)
 
     pii.update_layout(
         legend=dict(
@@ -151,7 +153,7 @@ def get_tabular_summary(df):
             x=1
         ),
         title_x=0.50,
-        title_y=0.00
+        title_y=0.02
     )
     pic.update_layout(
         legend=dict(
@@ -162,7 +164,7 @@ def get_tabular_summary(df):
             x=1
         ),
         title_x=0.50,
-        title_y=0.00
+        title_y=0.02
     )
 
     return html.Div([
@@ -203,8 +205,8 @@ def get_totals(df):
     return html.Div([
         html.Div([
             dbc.CardDeck([
-                get_bootstrap_card(totalsum, "Invested Value", "dark"),
-                get_bootstrap_card(totalcurr, "Current Value", "dark"),
+                get_bootstrap_card(totalsum, "INVESTED", "dark"),
+                get_bootstrap_card(totalcurr, "CURRENT", "dark"),
                 get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
                 get_bootstrap_card(pl, "Profit/Loss %", isprofit),
             ]),
@@ -247,4 +249,5 @@ def get_transactions_page(sheet):
             page_size=13,
             sort_by=[{'column_id': 'epoch', 'direction': 'desc'}],
         )
-    ])
+    ], className="container-fluid mb-3 shadow \
+            border border border-dark")
