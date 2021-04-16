@@ -8,12 +8,12 @@ import dash_table
 import pandas as pd
 
 
-def graphformat(title, xtitle, ytitle, height):
+def graphformat(title, xtitle, ytitle):
     gformat = constants.GRAPH_FORMAT
     gformat['title'] = title
     gformat['xaxis']['title'] = xtitle
     gformat['yaxis']['title'] = ytitle
-    gformat['height'] = height
+    # gformat['height'] = height
     return gformat
 
 
@@ -49,13 +49,13 @@ def render_app_layout():
     return html.Div([dcc.Location(id="url"), sidebar, content])
 
 
-def set_figure_attributes(fig, title, xtitle, ytitle, height, barmode=''):
+def set_figure_attributes(fig, title, xtitle, ytitle, barmode=''):
     if barmode == '':
         fig.update_layout(graphformat(title, xtitle,
-                                      ytitle, height))
+                                      ytitle))
     else:
         fig.update_layout(graphformat(title, xtitle,
-                                      ytitle, height), barmode=barmode)
+                                      ytitle), barmode=barmode)
     fig.update_xaxes(
         rangeselector=constants.DATERANGE_SELECTOR
     )
@@ -79,16 +79,15 @@ def get_historic_page_layout(dropdowns, funds):
                 dbc.Col([
                     html.Div(
                         "SELECT FUND",
-                        className="lead text-white text-center",
-                        style={'font-size': '1.5rem'}
+                        className="lead text-white text-left",
                     )
-                ], width=5),
+                ], xs=12, sm=12, md=3, lg=3, xl=3),
                 dbc.Col([
                     html.Div([
                         dcc.Dropdown(id='dropdown', options=dropdowns,
                                         value=funds[-1])
                     ])
-                ], width=7)
+                ], xs=12, sm=12, md=9, lg=9, xl=9)
             ]),
         ],
             className="container-fluid bg-dark py-3 shadow \
@@ -136,31 +135,59 @@ def get_tabular_summary(df):
         go.Bar(x=x, y=y2, name='Current')
     ])
     fig.update_layout(graphformat('Funds', 'Fund',
-                                  'Value', 600), barmode='group')
+                                  'Value'), barmode='group')
 
     pii = px.pie(df, values='cumsum', names='scheme_name',
                  title='Invested', labels={'cumsum': 'Amount'})
     pic = px.pie(df, values='value', names='scheme_name',
                  title='Current', labels={'value': 'Amount'})
-    pii.update_layout(title_x=0.5)
-    pic.update_layout(title_x=0.5)
+
+    pii.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        title_x=0.50,
+        title_y=0.00
+    )
+    pic.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        title_x=0.50,
+        title_y=0.00
+    )
+
     return html.Div([
-        html.Div([
-            dcc.Graph(id='graph-overall', figure=fig)
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(id='graph-overall', figure=fig)
+            ], xs=12, sm=12, md=12, lg=12, xl=12)
         ],
             className="container-fluid py-3 shadow border border-dark"
         ),
-        html.Div([
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(figure=pii)
-                ], className="border mx-1 border-dark"),
-                dbc.Col([
-                    dcc.Graph(figure=pic)
-                ], className="border mx-1 border-dark"),
-            ])
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(figure=pii)
+                ],
+                className="border py-3 border-dark",
+                xs=12, sm=12, md=6, lg=6, xl=6
+            ),
+            dbc.Col([
+                dcc.Graph(figure=pic)
+                ],
+                className="border py-3 border-dark",
+                xs=12, sm=12, md=6, lg=6, xl=6
+            ),
         ],
-            className="container-fluid py-3 my-3 shadow"
+            className="container-fluid my-3 shadow",
         ),
     ])
 
@@ -190,7 +217,6 @@ def get_totals(df):
                 style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
                 style_header=constants.TABLE_HEADER_STYLE,
                 style_cell=constants.TABLE_CELL_STYLE,
-                style_table=constants.TABLE_STYLE,
                 fixed_rows={'headers': True},
                 sort_action="native",
                 filter_action='native',
@@ -215,7 +241,6 @@ def get_transactions_page(sheet):
             style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
             style_header=constants.TABLE_HEADER_STYLE,
             style_cell=constants.TABLE_CELL_STYLE,
-            style_table=constants.TABLE_STYLE,
             fixed_rows={'headers': True},
             sort_action="native",
             filter_action='native',

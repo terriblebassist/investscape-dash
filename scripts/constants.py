@@ -62,7 +62,6 @@ GRAPH_FORMAT = dict(
             showgrid=False,
         ),
         template='simple_white',
-        height='height'
     )
 TABULAR_SUMMARY_VIEW = [
     {'name': 'Scheme', 'id': 'scheme_name'},
@@ -86,11 +85,8 @@ TABLE_CELL_STYLE = {
     'whiteSpace': 'normal',
     'height': 'auto',
     'textAlign': 'center',
-    'fontSize': 16
-}
-TABLE_STYLE = {
-    'maxHeight': '700px',
-    'overflowY': 'scroll'
+    'overflow': 'hidden',
+    'textOverflow': 'ellipsis',
 }
 TABLE_CONDITIONAL_STYLE = [
     {
