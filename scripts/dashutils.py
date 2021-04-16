@@ -178,9 +178,6 @@ def get_totals(df):
             dbc.CardDeck([
                 get_bootstrap_card(totalsum, "Invested Value", "dark"),
                 get_bootstrap_card(totalcurr, "Current Value", "dark"),
-            ]),
-            html.Hr(),
-            dbc.CardDeck([
                 get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
                 get_bootstrap_card(pl, "Profit/Loss %", isprofit),
             ]),
