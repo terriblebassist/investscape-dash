@@ -20,7 +20,7 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
 }
 CONTENT_STYLE = {
-    "margin-top": "7rem",
+    "margin-top": "6rem",
     "padding": "2rem 1rem",
 }
 DATERANGE_SELECTOR = dict(

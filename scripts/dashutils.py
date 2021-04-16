@@ -44,7 +44,8 @@ def render_app_layout():
     )
 
     content = html.Div(id="page-content", style=constants.CONTENT_STYLE,
-                       className="container-lg mx-auto shadow")
+                       className="container-lg bg-light mx-auto \
+                           shadow-lg border-secondary")
     return html.Div([dcc.Location(id="url"), sidebar, content])
 
 
@@ -76,37 +77,54 @@ def get_historic_page_layout(dropdowns, funds):
         html.Div([
             dbc.Row([
                 dbc.Col([
-                    html.P("SELECT FUND :", className="lead")
-                ], width=1, align="center"),
+                    html.Div(
+                        "SELECT FUND",
+                        className="lead text-white text-center",
+                        style={'font-size': '1.5rem'}
+                    )
+                ], width=5),
                 dbc.Col([
-                    dcc.Dropdown(id='dropdown', options=dropdowns,
-                                 value=funds[-1])
-                ], width=11, align="center")
+                    html.Div([
+                        dcc.Dropdown(id='dropdown', options=dropdowns,
+                                        value=funds[-1])
+                    ])
+                ], width=7)
             ]),
-        ], className="container-fluid py-3 shadow"),
+        ],
+            className="container-fluid bg-dark py-3 shadow \
+                rounded border border-dark",
+        ),
+
         html.Div([
             dcc.Graph(id='graph-value'),
-        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
+        ], className="container-fluid my-3 shadow border border-dark"),
         html.Div([
             dcc.Graph(id='graph-nav'),
-        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
+        ], className="container-fluid my-3 shadow border border-dark"),
         html.Div([
             dcc.Graph(id='graph-pl')
-        ], className="container-fluid shadow", style={'margin-top': '2rem'}),
+        ], className="container-fluid my-3 shadow border border-dark"),
     ])
 
 
 def get_bootstrap_card(var, cardheader, color):
     return dbc.Card([
-                    dbc.CardHeader(
-                        cardheader,
-                        style=constants.STYLE_CENTRE_TEXT,
-                        className='lead'
-                    ),
-                    dbc.CardBody([
-                        html.H4(f"{var:,}", className="card-text"),
-                    ], style=constants.STYLE_CENTRE_TEXT),
-                    ], color=color, outline=True)
+        dbc.CardHeader(
+            cardheader,
+            style=constants.STYLE_CENTRE_TEXT,
+            className=f"lead font-weight-bold text-white bg-{color}"
+        ),
+        dbc.CardBody([
+            html.H4(
+                f"{var:,}",
+                className=f"card-text text-{color}"
+            ),
+        ], style=constants.STYLE_CENTRE_TEXT),
+    ],
+        color=color,
+        outline=True,
+        className="rounded-top"
+    )
 
 
 def get_tabular_summary(df):
@@ -130,16 +148,16 @@ def get_tabular_summary(df):
         html.Div([
             dcc.Graph(id='graph-overall', figure=fig)
         ],
-            className="container-fluid py-3 my-3 shadow"
+            className="container-fluid py-3 shadow border border-dark"
         ),
         html.Div([
             dbc.Row([
                 dbc.Col([
                     dcc.Graph(figure=pii)
-                ]),
+                ], className="border mx-1 border-dark"),
                 dbc.Col([
                     dcc.Graph(figure=pic)
-                ]),
+                ], className="border mx-1 border-dark"),
             ])
         ],
             className="container-fluid py-3 my-3 shadow"
@@ -156,15 +174,17 @@ def get_totals(df):
     isprofit = "success" if totalpl > 0 else "danger"
 
     return html.Div([
-        dbc.CardDeck([
-            get_bootstrap_card(totalsum, "Invested Value", "dark"),
-            get_bootstrap_card(totalcurr, "Current Value", "dark"),
-        ]),
-        html.Hr(),
-        dbc.CardDeck([
-            get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
-            get_bootstrap_card(pl, "Profit/Loss %", isprofit),
-        ]),
+        html.Div([
+            dbc.CardDeck([
+                get_bootstrap_card(totalsum, "Invested Value", "dark"),
+                get_bootstrap_card(totalcurr, "Current Value", "dark"),
+            ]),
+            html.Hr(),
+            dbc.CardDeck([
+                get_bootstrap_card(totalpl, "Profit/Loss", isprofit),
+                get_bootstrap_card(pl, "Profit/Loss %", isprofit),
+            ]),
+        ], className="container-fluid py-3 shadow border border-dark"),
         html.Div([
             dash_table.DataTable(
                 id='table',
@@ -178,7 +198,8 @@ def get_totals(df):
                 sort_action="native",
                 filter_action='native',
             )
-        ], className="container-fluid py-3 my-3 shadow")
+        ], className="container-fluid py-3 my-3 shadow \
+            border border border-dark")
     ])
 
 
