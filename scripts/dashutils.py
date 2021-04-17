@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import dash_table
 import pandas as pd
+import colorlover
+import bisect
 
 
 def graphformat(title, xtitle, ytitle):
@@ -13,7 +15,6 @@ def graphformat(title, xtitle, ytitle):
     gformat['title'] = title
     gformat['xaxis']['title'] = xtitle
     gformat['yaxis']['title'] = ytitle
-    # gformat['height'] = height
     return gformat
 
 
@@ -126,6 +127,65 @@ def get_bootstrap_card(var, cardheader, color):
     )
 
 
+def discrete_background_color_bins(df, styles, n_bins, lscale, columns):
+    bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
+    df_numeric_columns = df[columns]
+    df_max = df_numeric_columns.max().max()
+    df_min = df_numeric_columns.min().min()
+    ranges = [
+        ((df_max - df_min) * i) + df_min
+        for i in bounds
+    ]
+    bisect.insort(ranges, 0.0)
+    neg = len(list(filter(lambda x: (x < 0), ranges)))
+    pos = len(ranges) - neg
+    legend = []
+    for i in range(1, len(bounds)+1):
+        min_bound = ranges[i - 1]
+        max_bound = ranges[i]
+        scale = "Greens" if min_bound >= 0 else "Reds"
+        colorindex = neg - i if min_bound < 0 else i - 1
+        backgroundColor = colorlover.scales[str(
+            n_bins+1)]['seq'][scale][colorindex]
+        color = 'white' if (i < neg/2 or i > neg + pos/2) else 'inherit'
+
+        for column in df_numeric_columns:
+            styles.append({
+                'if': {
+                    'filter_query': (
+                        '{{{column}}} >= {min_bound}' +
+                        (' && {{{column}}} < {max_bound}' if (
+                            i < len(bounds) - 1) else '')
+                    ).format(column=column,
+                             min_bound=min_bound,
+                             max_bound=max_bound),
+                    'column_id': column
+                },
+                'backgroundColor': backgroundColor,
+                'color': color
+            })
+        legend.append(
+            html.Div(
+                style={
+                    'display': 'inline-block',
+                    'width': f'{100//(1+n_bins)}%'
+                },
+                children=[
+                    html.Div(
+                        style={
+                            'backgroundColor': backgroundColor,
+                            'borderLeft': '1px rgb(50, 50, 50) solid',
+                            'height': '10px'
+                        }
+                    ),
+                    html.Small(f"{int(min_bound)//lscale}",
+                               style={'paddingLeft': '2px'})
+                ])
+        )
+
+    return (styles, html.Div(legend, style={'padding': '5px 0 5px 0'}))
+
+
 def get_tabular_summary(df):
     x = df['scheme_name'].tolist()
     y1 = df['cumsum'].tolist()
@@ -139,32 +199,22 @@ def get_tabular_summary(df):
 
     pii = px.pie(df, values='cumsum', names='scheme_name',
                  title=f"INVESTED : {int(sum(y1)):,}",
-                 labels={'cumsum': 'Amount'}, hole=0.2)
+                 labels={'cumsum': 'Amount', 'scheme_name': 'Scheme'},
+                 hole=0.2)
     pic = px.pie(df, values='value', names='scheme_name',
                  title=f"CURRENT : {int(sum(y2)):,}",
-                 labels={'value': 'Amount'}, hole=0.2)
+                 labels={'value': 'Amount', 'scheme_name': 'Scheme'},
+                 hole=0.2)
 
     pii.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
+        legend=constants.PIE_CHART_CONFIG,
         title_x=0.50,
-        title_y=0.02
+        title_y=0.05
     )
     pic.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
+        legend=constants.PIE_CHART_CONFIG,
         title_x=0.50,
-        title_y=0.02
+        title_y=0.05
     )
 
     return html.Div([
@@ -178,13 +228,13 @@ def get_tabular_summary(df):
         dbc.Row([
             dbc.Col([
                 dcc.Graph(figure=pii)
-                ],
+            ],
                 className="border py-3 border-dark",
                 xs=12, sm=12, md=6, lg=6, xl=6
             ),
             dbc.Col([
                 dcc.Graph(figure=pic)
-                ],
+            ],
                 className="border py-3 border-dark",
                 xs=12, sm=12, md=6, lg=6, xl=6
             ),
@@ -201,7 +251,22 @@ def get_totals(df):
     pl = round(totalpl*100/totalsum, 2)
 
     isprofit = "success" if totalpl > 0 else "danger"
-
+    pl_legend_scale = 1000
+    percent_legend_scale = 1
+    (styles, pllegend) = discrete_background_color_bins(
+        df,
+        [],
+        len(df)//2,
+        pl_legend_scale,
+        ['pl']
+    )
+    (styles, plpercentlegend) = discrete_background_color_bins(
+        df,
+        styles,
+        len(df)//2,
+        percent_legend_scale,
+        ['plpercent'],
+    )
     return html.Div([
         html.Div([
             dbc.CardDeck([
@@ -212,16 +277,38 @@ def get_totals(df):
             ]),
         ], className="container-fluid py-3 shadow border border-dark"),
         html.Div([
+            dbc.Row([
+                dbc.Col([
+                    html.Div(
+                        f"P/L (x{pl_legend_scale})",
+                        className="font-weight-light")
+                ], xs=12, sm=12, md=1, lg=1, xl=1),
+                dbc.Col([
+                    pllegend
+                ], xs=12, sm=12, md=5, lg=5, xl=5),
+                dbc.Col([
+                    html.Div(
+                        f"P/L % (x{percent_legend_scale})",
+                        className="font-weight-light")
+                ], xs=12, sm=12, md=1, lg=1, xl=1),
+                dbc.Col([
+                    plpercentlegend
+                ], xs=12, sm=12, md=5, lg=5, xl=5)
+            ], className="bg-dark text-white my-1"),
             dash_table.DataTable(
                 id='table',
                 columns=constants.TABULAR_SUMMARY_VIEW,
                 data=df.to_dict('records'),
-                style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
+                style_data_conditional=styles,
                 style_header=constants.TABLE_HEADER_STYLE,
                 style_cell=constants.TABLE_CELL_STYLE,
                 fixed_rows={'headers': True},
                 sort_action="native",
                 filter_action='native',
+                tooltip_data=[{
+                    column: {'value': str(value), 'type': 'markdown'}
+                    for column, value in row.items()
+                } for row in df.to_dict('records')],
             )
         ], className="container-fluid py-3 my-3 shadow \
             border border border-dark")
@@ -246,7 +333,7 @@ def get_transactions_page(sheet):
             fixed_rows={'headers': True},
             sort_action="native",
             filter_action='native',
-            page_size=13,
+            page_size=10,
             sort_by=[{'column_id': 'epoch', 'direction': 'desc'}],
         )
     ], className="container-fluid mb-3 shadow \
