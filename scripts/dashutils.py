@@ -7,7 +7,7 @@ import plotly.express as px
 import dash_table
 import pandas as pd
 import colorlover
-import bisect
+import numpy as np
 
 
 def graphformat(title, xtitle, ytitle):
@@ -130,23 +130,19 @@ def get_bootstrap_card(var, cardheader, color):
 def discrete_background_color_bins(df, styles, n_bins, lscale, columns):
     bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
     df_numeric_columns = df[columns]
-    df_max = df_numeric_columns.max().max()
-    df_min = df_numeric_columns.min().min()
-    ranges = [
-        ((df_max - df_min) * i) + df_min
-        for i in bounds
-    ]
-    bisect.insort(ranges, 0.0)
+    df_max = max(0, df_numeric_columns.max().max())
+    df_min = min(0, df_numeric_columns.min().min())
+    ranges = np.linspace(df_min, df_max, n_bins+1)
     neg = len(list(filter(lambda x: (x < 0), ranges)))
     pos = len(ranges) - neg
     legend = []
-    for i in range(1, len(bounds)+1):
+    for i in range(1, len(bounds)):
         min_bound = ranges[i - 1]
         max_bound = ranges[i]
         scale = "Greens" if min_bound >= 0 else "Reds"
         colorindex = neg - i if min_bound < 0 else i - 1
         backgroundColor = colorlover.scales[str(
-            n_bins+1)]['seq'][scale][colorindex]
+            n_bins)]['seq'][scale][colorindex]
         color = 'white' if (i < neg/2 or i > neg + pos/2) else 'inherit'
 
         for column in df_numeric_columns:
@@ -256,14 +252,14 @@ def get_totals(df):
     (styles, pllegend) = discrete_background_color_bins(
         df,
         [],
-        len(df)//2,
+        len(df),
         pl_legend_scale,
         ['pl']
     )
     (styles, plpercentlegend) = discrete_background_color_bins(
         df,
         styles,
-        len(df)//2,
+        len(df),
         percent_legend_scale,
         ['plpercent'],
     )
