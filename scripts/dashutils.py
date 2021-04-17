@@ -7,6 +7,7 @@ import plotly.express as px
 import dash_table
 import pandas as pd
 import colorlover
+import bisect
 
 
 def graphformat(title, xtitle, ytitle):
@@ -128,28 +129,26 @@ def get_bootstrap_card(var, cardheader, color):
 
 def discrete_background_color_bins(df, n_bins=5, columns='all'):
     bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
-    if columns == 'all':
-        if 'id' in df:
-            df_numeric_columns = df.select_dtypes(
-                'number').drop(['id'], axis=1)
-        else:
-            df_numeric_columns = df.select_dtypes('number')
-    else:
-        df_numeric_columns = df[columns]
+    df_numeric_columns = df[columns]
     df_max = df_numeric_columns.max().max()
     df_min = df_numeric_columns.min().min()
     ranges = [
         ((df_max - df_min) * i) + df_min
         for i in bounds
     ]
+    bisect.insort(ranges, 0.0)
+    neg = len(list(filter(lambda x: (x < 0), ranges)))
+    pos = len(ranges) - neg
     styles = []
     legend = []
-    for i in range(1, len(bounds)):
+    for i in range(1, len(bounds)+1):
         min_bound = ranges[i - 1]
         max_bound = ranges[i]
+        scale = "Greens" if min_bound >= 0 else "Reds"
+        colorindex = neg - i if min_bound < 0 else i - 1
         backgroundColor = colorlover.scales[str(
-            n_bins)]['seq']['Greens'][i - 1]
-        color = 'white' if i > len(bounds) / 2. else 'inherit'
+            n_bins+1)]['seq'][scale][colorindex]
+        color = 'white' if (i < neg/2 or i > neg + pos/2) else 'inherit'
 
         for column in df_numeric_columns:
             styles.append({
@@ -168,7 +167,10 @@ def discrete_background_color_bins(df, n_bins=5, columns='all'):
             })
         legend.append(
             html.Div(
-                style={'display': 'inline-block', 'width': f'{100//n_bins}%'},
+                style={
+                    'display': 'inline-block',
+                    'width': f'{100//(1+n_bins)}%'
+                },
                 children=[
                     html.Div(
                         style={
@@ -252,8 +254,8 @@ def get_totals(df):
     isprofit = "success" if totalpl > 0 else "danger"
     (styles, legend) = discrete_background_color_bins(
         df,
-        1+len(df)//2,
-        columns=['pl', 'plpercent']
+        len(df)//2,
+        columns=['pl']
     )
     return html.Div([
         html.Div([
