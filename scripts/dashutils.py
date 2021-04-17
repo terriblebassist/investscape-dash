@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import dash_table
 import pandas as pd
+import colorlover
 
 
 def graphformat(title, xtitle, ytitle):
@@ -125,6 +126,65 @@ def get_bootstrap_card(var, cardheader, color):
     )
 
 
+def discrete_background_color_bins(df, n_bins=5, columns='all'):
+    bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
+    if columns == 'all':
+        if 'id' in df:
+            df_numeric_columns = df.select_dtypes(
+                'number').drop(['id'], axis=1)
+        else:
+            df_numeric_columns = df.select_dtypes('number')
+    else:
+        df_numeric_columns = df[columns]
+    df_max = df_numeric_columns.max().max()
+    df_min = df_numeric_columns.min().min()
+    ranges = [
+        ((df_max - df_min) * i) + df_min
+        for i in bounds
+    ]
+    styles = []
+    legend = []
+    for i in range(1, len(bounds)):
+        min_bound = ranges[i - 1]
+        max_bound = ranges[i]
+        backgroundColor = colorlover.scales[str(
+            n_bins)]['seq']['Greens'][i - 1]
+        color = 'white' if i > len(bounds) / 2. else 'inherit'
+
+        for column in df_numeric_columns:
+            styles.append({
+                'if': {
+                    'filter_query': (
+                        '{{{column}}} >= {min_bound}' +
+                        (' && {{{column}}} < {max_bound}' if (
+                            i < len(bounds) - 1) else '')
+                    ).format(column=column,
+                             min_bound=min_bound,
+                             max_bound=max_bound),
+                    'column_id': column
+                },
+                'backgroundColor': backgroundColor,
+                'color': color
+            })
+        legend.append(
+            html.Div(
+                style={'display': 'inline-block', 'width': f'{100//n_bins}%'},
+                children=[
+                    html.Div(
+                        style={
+                            'backgroundColor': backgroundColor,
+                            'borderLeft': '1px rgb(50, 50, 50) solid',
+                            'height': '10px'
+                        }
+                    ),
+                    html.Small(f"{int(min_bound/1000)}k",
+                               style={'paddingLeft': '2px'})
+                ])
+        )
+
+    return (styles, html.Div(legend, style={'padding': '5px 0 5px 0'}))
+
+
 def get_tabular_summary(df):
     x = df['scheme_name'].tolist()
     y1 = df['cumsum'].tolist()
@@ -190,7 +250,11 @@ def get_totals(df):
     pl = round(totalpl*100/totalsum, 2)
 
     isprofit = "success" if totalpl > 0 else "danger"
-
+    (styles, legend) = discrete_background_color_bins(
+        df,
+        1+len(df)//2,
+        columns=['pl', 'plpercent']
+    )
     return html.Div([
         html.Div([
             dbc.CardDeck([
@@ -201,16 +265,25 @@ def get_totals(df):
             ]),
         ], className="container-fluid py-3 shadow border border-dark"),
         html.Div([
+            dbc.Row([
+                dbc.Col([
+                    legend
+                ], xs=12, sm=12, md=5, lg=5, xl=5)
+            ], justify="end"),
             dash_table.DataTable(
                 id='table',
                 columns=constants.TABULAR_SUMMARY_VIEW,
                 data=df.to_dict('records'),
-                style_data_conditional=constants.TABLE_CONDITIONAL_STYLE,
+                style_data_conditional=styles,
                 style_header=constants.TABLE_HEADER_STYLE,
                 style_cell=constants.TABLE_CELL_STYLE,
                 fixed_rows={'headers': True},
                 sort_action="native",
                 filter_action='native',
+                tooltip_data=[{
+                    column: {'value': str(value), 'type': 'markdown'}
+                    for column, value in row.items()
+                } for row in df.to_dict('records')],
             )
         ], className="container-fluid py-3 my-3 shadow \
             border border border-dark")
