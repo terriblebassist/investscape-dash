@@ -127,7 +127,7 @@ def get_bootstrap_card(var, cardheader, color):
     )
 
 
-def discrete_background_color_bins(df, n_bins=5, columns='all'):
+def discrete_background_color_bins(df, styles, n_bins, lscale, columns):
     bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
     df_numeric_columns = df[columns]
     df_max = df_numeric_columns.max().max()
@@ -139,7 +139,6 @@ def discrete_background_color_bins(df, n_bins=5, columns='all'):
     bisect.insort(ranges, 0.0)
     neg = len(list(filter(lambda x: (x < 0), ranges)))
     pos = len(ranges) - neg
-    styles = []
     legend = []
     for i in range(1, len(bounds)+1):
         min_bound = ranges[i - 1]
@@ -179,7 +178,7 @@ def discrete_background_color_bins(df, n_bins=5, columns='all'):
                             'height': '10px'
                         }
                     ),
-                    html.Small(f"{int(min_bound/1000)}k",
+                    html.Small(f"{int(min_bound)//lscale}",
                                style={'paddingLeft': '2px'})
                 ])
         )
@@ -229,13 +228,13 @@ def get_tabular_summary(df):
         dbc.Row([
             dbc.Col([
                 dcc.Graph(figure=pii)
-                ],
+            ],
                 className="border py-3 border-dark",
                 xs=12, sm=12, md=6, lg=6, xl=6
             ),
             dbc.Col([
                 dcc.Graph(figure=pic)
-                ],
+            ],
                 className="border py-3 border-dark",
                 xs=12, sm=12, md=6, lg=6, xl=6
             ),
@@ -252,10 +251,21 @@ def get_totals(df):
     pl = round(totalpl*100/totalsum, 2)
 
     isprofit = "success" if totalpl > 0 else "danger"
-    (styles, legend) = discrete_background_color_bins(
+    pl_legend_scale = 1000
+    percent_legend_scale = 1
+    (styles, pllegend) = discrete_background_color_bins(
         df,
+        [],
         len(df)//2,
-        columns=['pl']
+        pl_legend_scale,
+        ['pl']
+    )
+    (styles, plpercentlegend) = discrete_background_color_bins(
+        df,
+        styles,
+        len(df)//2,
+        percent_legend_scale,
+        ['plpercent'],
     )
     return html.Div([
         html.Div([
@@ -269,9 +279,22 @@ def get_totals(df):
         html.Div([
             dbc.Row([
                 dbc.Col([
-                    legend
+                    html.Div(
+                        f"P/L (x{pl_legend_scale})",
+                        className="font-weight-light")
+                ], xs=12, sm=12, md=1, lg=1, xl=1),
+                dbc.Col([
+                    pllegend
+                ], xs=12, sm=12, md=5, lg=5, xl=5),
+                dbc.Col([
+                    html.Div(
+                        f"P/L % (x{percent_legend_scale})",
+                        className="font-weight-light")
+                ], xs=12, sm=12, md=1, lg=1, xl=1),
+                dbc.Col([
+                    plpercentlegend
                 ], xs=12, sm=12, md=5, lg=5, xl=5)
-            ], justify="end"),
+            ], className="bg-dark text-white my-1"),
             dash_table.DataTable(
                 id='table',
                 columns=constants.TABULAR_SUMMARY_VIEW,
