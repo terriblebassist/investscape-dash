@@ -70,9 +70,9 @@ TABULAR_SUMMARY_VIEW = [
      'format': Format(group=',')},
     {'name': 'Current', 'id': 'value', 'type': 'numeric',
      'format': Format(group=',')},
-    {'name': 'P/L', 'id': 'pl', 'type': 'numeric',
+    {'name': 'Profit/Loss', 'id': 'pl', 'type': 'numeric',
      'format': Format(group=',')},
-    {'name': 'P/L%', 'id': 'plpercent'}
+    {'name': 'P&L%', 'id': 'plpercent'}
 ]
 
 TABLE_HEADER_STYLE = {
@@ -87,6 +87,7 @@ TABLE_CELL_STYLE = {
     'textAlign': 'center',
     'overflow': 'hidden',
     'textOverflow': 'ellipsis',
+    'maxWidth': '0'
 }
 TABLE_CONDITIONAL_STYLE = [
     {
@@ -100,9 +101,16 @@ STYLE_CENTRE_TEXT = {
 TABULAR_TRANSACTION_VIEW = [
     {'name': 'S.No.', 'id': 'serial_no'},
     {'name': 'Date', 'id': 'transaction_date'},
-    {'name': 'Scheme Code', 'id': 'scheme_code'},
+    {'name': 'Code', 'id': 'scheme_code'},
     {'name': 'Scheme', 'id': 'scheme_name'},
     {'name': 'Amount', 'id': 'value', 'type': 'numeric',
      'format': Format(group=',')},
     {'name': 'Units', 'id': 'units'},
 ]
+PIE_CHART_CONFIG = dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="right",
+    x=1
+)

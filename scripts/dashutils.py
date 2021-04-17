@@ -13,7 +13,6 @@ def graphformat(title, xtitle, ytitle):
     gformat['title'] = title
     gformat['xaxis']['title'] = xtitle
     gformat['yaxis']['title'] = ytitle
-    # gformat['height'] = height
     return gformat
 
 
@@ -139,32 +138,22 @@ def get_tabular_summary(df):
 
     pii = px.pie(df, values='cumsum', names='scheme_name',
                  title=f"INVESTED : {int(sum(y1)):,}",
-                 labels={'cumsum': 'Amount'}, hole=0.2)
+                 labels={'cumsum': 'Amount', 'scheme_name': 'Scheme'},
+                 hole=0.2)
     pic = px.pie(df, values='value', names='scheme_name',
                  title=f"CURRENT : {int(sum(y2)):,}",
-                 labels={'value': 'Amount'}, hole=0.2)
+                 labels={'value': 'Amount', 'scheme_name': 'Scheme'},
+                 hole=0.2)
 
     pii.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
+        legend=constants.PIE_CHART_CONFIG,
         title_x=0.50,
-        title_y=0.02
+        title_y=0.05
     )
     pic.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
+        legend=constants.PIE_CHART_CONFIG,
         title_x=0.50,
-        title_y=0.02
+        title_y=0.05
     )
 
     return html.Div([
@@ -246,7 +235,7 @@ def get_transactions_page(sheet):
             fixed_rows={'headers': True},
             sort_action="native",
             filter_action='native',
-            page_size=13,
+            page_size=10,
             sort_by=[{'column_id': 'epoch', 'direction': 'desc'}],
         )
     ], className="container-fluid mb-3 shadow \
