@@ -44,9 +44,19 @@ def render_app_layout():
         fixed="top",
     )
 
-    content = html.Div(id="page-content", style=constants.CONTENT_STYLE,
-                       className="container-lg bg-light mx-auto \
-                           shadow-lg border-secondary")
+    content = dbc.Spinner(
+        size="lg",
+        color="dark",
+        fullscreen=True,
+        children=[
+            html.Div(
+                id="page-content",
+                style=constants.CONTENT_STYLE,
+                className="container-lg bg-light mx-auto \
+                    shadow-lg border-secondary"
+            )
+        ]
+    )
     return html.Div([dcc.Location(id="url"), sidebar, content])
 
 
