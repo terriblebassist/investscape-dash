@@ -14,7 +14,7 @@ cache = Cache(server, config={
     'CACHE_TYPE': 'filesystem',
     'CACHE_DIR': 'cache-directory'
 })
-TIMEOUT = 60
+TIMEOUT = config('CACHE_TIMEOUT', default=60)
 
 
 @cache.memoize(timeout=TIMEOUT)
