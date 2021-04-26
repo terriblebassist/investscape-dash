@@ -100,7 +100,7 @@ STYLE_CENTRE_TEXT = {
 }
 TABULAR_TRANSACTION_VIEW = [
     {'name': 'S.No.', 'id': 'serial_no'},
-    {'name': 'Date', 'id': 'transaction_date'},
+    {'name': 'Date', 'id': 'date'},
     {'name': 'Code', 'id': 'scheme_code'},
     {'name': 'Scheme', 'id': 'scheme_name'},
     {'name': 'Amount', 'id': 'value', 'type': 'numeric',

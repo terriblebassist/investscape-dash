@@ -322,9 +322,9 @@ def get_totals(df):
 
 
 def get_transactions_page(sheet):
-    sheet = sheet[['transaction_date', 'scheme_code',
+    sheet = sheet[['date', 'scheme_code',
                    'scheme_name', 'value', 'units']]
-    sheet['epoch'] = pd.to_datetime(sheet['transaction_date'],
+    sheet['epoch'] = pd.to_datetime(sheet['date'],
                                     format='%d/%m/%Y')
     sheet['epoch'] = sheet['epoch'].astype('int64')
     sheet['serial_no'] = sheet['epoch'].rank(method='first')

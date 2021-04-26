@@ -1,4 +1,5 @@
 from scripts import constants, connectgooglesheets, historicalnav
+# from scripts.mongoconnect import MongoDriver
 import pandas as pd
 from decouple import config
 
@@ -37,6 +38,9 @@ def populate_df_attributes():
                                                      config('RANGE_NAME'))
     # dump.to_csv('transaction_dump.csv')
 
+    # Uncomment to re-assign `dump` from MongoDB
+    # mdb = MongoDriver()
+    # dump = mdb.get_data()
     df = create_cumulative_transaction_series_df(dump)
     df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
     df = df[df['cumsum'] != 0.0]
