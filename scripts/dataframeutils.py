@@ -40,7 +40,7 @@ def populate_df_attributes():
 
     # Uncomment to re-assign `dump` from MongoDB
     # mdb = MongoDriver()
-    # dump = mdb.get_data()
+    # dump = mdb.fetch_collection_in_dataframe()
     df = create_cumulative_transaction_series_df(dump)
     df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
     df = df[df['cumsum'] != 0.0]
