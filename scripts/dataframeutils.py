@@ -1,7 +1,5 @@
-from scripts import constants, connectgooglesheets, historicalnav
-# from scripts.mongoconnect import MongoDriver
+from scripts import constants, historicalnav
 import pandas as pd
-from decouple import config
 
 
 def create_cumulative_transaction_series_df(df):
@@ -33,14 +31,8 @@ def create_cumulative_transaction_series_df(df):
     return filled_df
 
 
-def populate_df_attributes():
-    dump = connectgooglesheets.get_transactions_dump(config('SPREADSHEET_ID'),
-                                                     config('RANGE_NAME'))
+def populate_df_attributes(dump):
     # dump.to_csv('transaction_dump.csv')
-
-    # Uncomment to re-assign `dump` from MongoDB
-    # mdb = MongoDriver()
-    # dump = mdb.fetch_collection_in_dataframe()
     df = create_cumulative_transaction_series_df(dump)
     df = df[['scheme_code', 'scheme_name', 'date', 'cumsum', 'cumunits']]
     df = df[df['cumsum'] != 0.0]
@@ -55,7 +47,7 @@ def populate_df_attributes():
         row['cumunits']) * row['historicnav'], axis=1)
     df['pl'] = df.apply(lambda row: float(row['value']) -
                         float(row['cumsum']), axis=1)
-    return df, dump
+    return df
 
 
 def get_distinct_funds(df):

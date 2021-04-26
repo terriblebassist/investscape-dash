@@ -9,3 +9,4 @@ venv
 .idea/**
 htmlcov/**
 .coverage
+cache-directory/**
