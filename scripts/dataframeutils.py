@@ -67,7 +67,7 @@ def get_dropdown_map(funds):
 def extract_stats(df):
     currentVal = df.loc[df.groupby('scheme_code').date.idxmax()]
     currentVal['plpercent'] = currentVal['pl']*100/currentVal['cumsum']
-    customview = ['scheme_name', 'cumunits',
+    customview = ['scheme_code', 'scheme_name', 'cumunits',
                   'cumsum', 'value', 'pl', 'plpercent']
     currentVal = currentVal[customview].round(2)
     round_cols = ['cumsum', 'value', 'pl']

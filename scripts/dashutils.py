@@ -8,6 +8,7 @@ import dash_table
 import pandas as pd
 import colorlover
 import numpy as np
+import datetime
 
 
 def graphformat(title, xtitle, ytitle):
@@ -31,6 +32,8 @@ def render_app_layout():
                                 href="/page-3", id="page-3-link"),
                     dbc.NavLink("Transactions",
                                 href="/page-4", id="page-4-link"),
+                    dbc.NavLink("Add Transaction",
+                                href="/page-5", id="page-5-link"),
                 ],
                 pills=True,
                 fill=True,
@@ -341,6 +344,87 @@ def get_transactions_page(sheet):
             filter_action='native',
             page_size=10,
             sort_by=[{'column_id': 'epoch', 'direction': 'desc'}],
+            export_format="csv",
         )
     ], className="container-fluid mb-3 shadow \
+            border border border-dark")
+
+
+def get_submission_page(dropdowns):
+    form = dbc.Form([
+        dbc.FormGroup([
+            dbc.Row([
+                dbc.Col([
+                    dcc.Dropdown(
+                        id="dropdown_fund",
+                        placeholder="Fund",
+                        options=dropdowns,
+                        className="text-center"
+                    )
+                ], xs=12, sm=12, md=12, lg=12, xl=12, className="p-2"),
+                dbc.Col([
+                    dbc.InputGroup([
+                        dbc.InputGroupAddon("INR", addon_type="prepend"),
+                        dbc.Input(
+                            placeholder="Amount",
+                            type="number",
+                            id="transaction_amount",
+                            className="text-center"
+                        ),
+                    ])
+                ], xs=12, sm=12, md=6, lg=6, xl=6, className="p-2"),
+                dbc.Col([
+                    dbc.InputGroup([
+                        dbc.Input(placeholder="Units", type="number",
+                                  id="transaction_units"),
+                    ])
+                ], xs=12, sm=12, md=6, lg=6, xl=6, className="p-2"),
+            ], justify="center"),
+            dbc.Row([
+                dbc.Col([
+                    dcc.DatePickerSingle(
+                        id="date-picker",
+                        clearable=True,
+                        display_format="Do MMM YYYY",
+                        month_format='MMMM YYYY',
+                        placeholder='Date',
+                        max_date_allowed=datetime.datetime.now(),
+                        reopen_calendar_on_clear=True,
+                        with_portal=True,
+                    )
+                ], xs=8, sm=8, md=2, lg=2, xl=2, className="p-2"),
+            ], justify="center"),
+            html.Hr(),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Button("Submit Transaction", color="primary",
+                               id="submit-button", block=True),
+                ], xs=6, sm=6, md=3, lg=3, xl=3, className="p-2")
+            ], justify="center"),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Alert(
+                        "Transaction submitted!",
+                        id="alert-success",
+                        is_open=False,
+                        dismissable=True,
+                        className="text-center"
+                    ),
+                ], xs=12, sm=12, md=10, lg=10, xl=10, className="p-2"),
+                dbc.Col([
+                    dbc.Alert(
+                        "Please enter valid details!",
+                        id="alert-danger",
+                        is_open=False,
+                        dismissable=True,
+                        color="danger",
+                        className="text-center"
+                    ),
+                ], xs=12, sm=12, md=10, lg=10, xl=10, className="p-2")
+            ], justify="center"),
+        ])
+    ])
+    return html.Div([
+        form,
+    ], className="container-fluid py-3 my-3 shadow \
             border border border-dark")

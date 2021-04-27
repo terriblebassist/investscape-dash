@@ -1,31 +1,33 @@
 import plotly.graph_objects as go
+from datetime import date
 
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from scripts import (
-    dataframeutils, dashutils, connectgooglesheets
+    dataframeutils, dashutils
 )
 from scripts.dashapp import app
-# from scripts.mongoconnect import MongoDriver
+from scripts.mongoconnect import MongoDriver
 from flask_caching import Cache
 from decouple import config
+# from scripts import connectgooglesheets
 
 server = app.server
 cache = Cache(server, config={
     'CACHE_TYPE': 'filesystem',
     'CACHE_DIR': 'cache-directory'
 })
-TIMEOUT = config('CACHE_TIMEOUT', default=60)
+TIMEOUT = config('CACHE_TIMEOUT', default=300)
 
 
 @cache.memoize(timeout=TIMEOUT)
 def get_transactions():
     print("fetching transactions")
-    # Uncomment for mongo index usage, instead of google sheets
-    # mdb = MongoDriver()
-    # dump = mdb.fetch_collection_in_dataframe()
+    mdb = MongoDriver()
+    dump = mdb.fetch_collection_in_dataframe()
 
-    dump = connectgooglesheets.get_transactions_dump(config('SPREADSHEET_ID'),
-                                                     config('RANGE_NAME'))
+    # Google sheets integration
+    # dump=connectgooglesheets.get_transactions_dump(config('SPREADSHEET_ID'),
+    #                                                  config('RANGE_NAME'))
     return dump
 
 
@@ -45,6 +47,52 @@ df = get_timeseries_df(dump)
 funds = dataframeutils.get_distinct_funds(df)
 dropdowns = dataframeutils.get_dropdown_map(funds)
 currentVal = get_current_stats(df)
+
+
+@app.callback(
+    [Output("submit-button", "n_clicks"),
+     Output('dropdown_fund', 'value'),
+     Output('date-picker', 'value'),
+     Output('transaction_amount', 'value'),
+     Output('transaction_units', 'value'),
+     Output("alert-success", "is_open"),
+     Output("alert-danger", "is_open")
+     ],
+    [Input('submit-button', 'n_clicks'),
+     State('dropdown_fund', 'value'),
+     State('date-picker', 'date'),
+     State('transaction_amount', 'value'),
+     State('transaction_units', 'value'),
+     State("alert-success", "is_open"),
+     State("alert-danger", "is_open")]
+)
+def create_transaction(n_clicks, fund, date_value,
+                       amount, units, is_open_success, is_open_danger):
+
+    check_inputs = fund != '' and date_value is not None \
+        and amount != '' and units != ''
+
+    if n_clicks and check_inputs:
+        tr_date = date.fromisoformat(date_value).strftime('%d/%m/%Y')
+        dump = get_transactions()
+        df = get_timeseries_df(dump)
+        currentVal = get_current_stats(df)
+        row = currentVal.loc[currentVal['scheme_name'] == fund]
+        scheme_code = row['scheme_code'].item()
+
+        mdb = MongoDriver()
+        transaction = {
+            "date": tr_date,
+            "scheme_code": scheme_code,
+            "scheme_name": fund,
+            "value": amount,
+            "units": units
+        }
+        mdb.insert_document_in_collection(transaction)
+        cache.delete_memoized(get_transactions)
+        return 0, '', '', '', '', True, False
+
+    return 0, '', '', '', '', False, True
 
 
 @app.callback(Output('graph-value', 'figure'),
@@ -97,13 +145,13 @@ def update_figure_graph_pl(selected_value):
 
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 6)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
-        return True, False, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 5)]
+        return True, False, False, False, False
+    return [pathname == f"/page-{i}" for i in range(1, 6)]
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -123,6 +171,10 @@ def render_page_content(pathname):
         return dashutils.get_historic_page_layout(dropdowns, funds)
     elif pathname == "/page-4":
         return dashutils.get_transactions_page(dump)
+    elif pathname == "/page-5":
+        funds = dataframeutils.get_distinct_funds(df)
+        dropdowns = dataframeutils.get_dropdown_map(funds)
+        return dashutils.get_submission_page(dropdowns)
     return dashutils.get_error_messsage(pathname)
 
 
