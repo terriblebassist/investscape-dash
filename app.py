@@ -90,6 +90,7 @@ def create_transaction(n_clicks, fund, date_value,
         }
         mdb.insert_document_in_collection(transaction)
         cache.delete_memoized(get_transactions)
+        cache.delete_memoized(get_timeseries_df)
         return 0, '', '', '', '', True, False
 
     return 0, '', '', '', '', False, True
